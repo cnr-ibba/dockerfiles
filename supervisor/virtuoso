@@ -3,12 +3,8 @@ nodaemon=true
 
 [program:sshd]
 command=/usr/sbin/sshd -D
-stdout_logfile=/var/log/supervisor/%(program_name)s.log
-stderr_logfile=/var/log/supervisor/%(program_name)s.log
 autorestart=true
 
 [program:mongod]
 command=/usr/local/virtuoso-opensource-7.1.0/bin/virtuoso-t -f +configfile /usr/local/virtuoso-opensource-7.1.0/var/lib/virtuoso/db/virtuoso.ini
-stdout_logfile=/var/log/supervisor/%(program_name)s.log
-stderr_logfile=/var/log/supervisor/%(program_name)s.log
 autorestart=true
