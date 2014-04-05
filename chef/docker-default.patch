@@ -4,7 +4,7 @@
      value 1
      only_if { node['platform'] == 'debian' }
    end
-+	execute "Upgrading to latest server" do
++	execute "Upgrading to latest kernel" do
 +		command "apt-get update && apt-get install linux-image-generic-lts-raring linux-headers-generic-lts-raring vim"
 +	end
  end
