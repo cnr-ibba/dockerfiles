@@ -5,6 +5,6 @@ nodaemon=true
 command=/usr/sbin/sshd -D
 autorestart=true
 
-[program:mongod]
+[program:virtuoso]
 command=/usr/local/virtuoso-opensource-7.1.0/bin/virtuoso-t -f +configfile /usr/local/virtuoso-opensource-7.1.0/var/lib/virtuoso/db/virtuoso.ini
 autorestart=true
