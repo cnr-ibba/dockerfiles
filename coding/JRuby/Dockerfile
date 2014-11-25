@@ -1,5 +1,5 @@
 FROM jruby:1.7.16
-RUN apt-get update && apt-get -y install vim vim-nox git curl
+RUN apt-get update && apt-get -y install vim vim-nox git curl tmux
 RUN curl -sSL https://raw.githubusercontent.com/fstrozzi/dotvim/master/install.sh | bash
 RUN git config --global user.name "Francesco Strozzi"
 RUN git config --global user.email francesco.strozzi@gmail.com
