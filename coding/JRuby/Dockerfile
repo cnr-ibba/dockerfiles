@@ -31,6 +31,8 @@ RUN git config --global user.name "Francesco Strozzi"
 RUN git config --global user.email francesco.strozzi@gmail.com
 RUN echo "PS1='\[\e[1;32m\][\u@\h \W]\$\[\e[0m\] '" >> /root/.bashrc
 RUN sed -i 's/# alias/alias/g' /root/.bashrc
+RUN echo "alias tmux='tmux -2'" >> /root/.bashrc
+RUN curl https://raw.githubusercontent.com/fstrozzi/dockerfiles/master/coding/tmux.conf > /root/.tmux.conf
 
 # Setting the entrypoint
 RUN gem install pry
