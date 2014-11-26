@@ -1,0 +1,54 @@
+#!/bin/bash
+
+while [[ $# > 1 ]]
+do
+	key="$1"
+	shift
+
+	case $key in
+		-n|--name)
+		NAME="$1"
+		shift
+		;;
+		-i|--image)
+		IMAGE="$1"
+		shift
+		;;
+		-a|--attach)
+		ATTACH="y"
+		;;
+		-v|--volume)
+		VOLUME=$1
+		shift
+		;;
+		-d|--docker-option)
+		DOCKEROPT=$1
+		shift
+		;;
+		*)
+							# unknown option
+		;;
+	esac
+done
+
+if [ "$ATTACH" = "y" ] && [ -n "$NAME" ]; then
+	docker start -i $NAME
+elif [ -n "$IMAGE" ] && [ -n "$NAME" ] && [ -n "$VOLUME" ]; then
+	docker run -it -e 'TZ=Europe/Rome' --name $NAME -v $VOLUME:/outside $DOCKEROPT $IMAGE /bin/bash
+elif [ -n "$IMAGE" ] && [ -n "$NAME" ]; then
+	docker run -it -e 'TZ=Europe/Rome' --name $NAME $DOCKEROPT $IMAGE /bin/bash
+else
+	echo "
+		USAGE:
+			-n|--name [STRING]          : The name of the container
+			-i|--image [STRING]         : The name of the image to create a new container
+			-a|--attach                 : Flag to reconnect to an existing container
+			-v|--volume [STRING]        : Folder to mount inside the container (default path with container: /outside)
+			-d|--docker-option [STRING]	: Any other docker run option
+		EXAMPLES:
+		
+		> runDock -i scala-env -n newScalaProject (fire up a new container)
+		> runDock -a -n existingContainer         (reconnect to existing container)
+			"
+fi
+
