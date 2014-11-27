@@ -32,10 +32,11 @@ RUN yum -y remove gcc bison
 RUN curl -sSL https://raw.githubusercontent.com/fstrozzi/dotvim/master/install.sh | bash
 RUN git config --global user.name "Francesco Strozzi"
 RUN git config --global user.email francesco.strozzi@gmail.com
-RUN echo "PS1='\[\e[1;32m\][\u@\h \W]\$\[\e[0m\] '" >> /root/.bashrc
-RUN sed -i 's/# alias/alias/g' /root/.bashrc
-RUN echo "alias tmux='tmux -2'" >> /root/.bashrc
+# set tmux aliases and configuration
 RUN curl https://raw.githubusercontent.com/fstrozzi/dockerfiles/master/coding/tmux.conf > /root/.tmux.conf
+# zsh
+RUN yum -y install zsh && curl -L http://install.ohmyz.sh | sh
+RUN curl https://raw.githubusercontent.com/fstrozzi/dockerfiles/master/coding/zshrc > /root/.zshrc
 
 
 # Setting the entrypoint
