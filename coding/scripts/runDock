@@ -34,9 +34,9 @@ done
 if [ "$ATTACH" = "y" ] && [ -n "$NAME" ]; then
 	docker start -i $NAME
 elif [ -n "$IMAGE" ] && [ -n "$NAME" ] && [ -n "$VOLUME" ]; then
-	docker run -it -e 'TZ=Europe/Rome' --name $NAME -v $VOLUME:/outside $DOCKEROPT $IMAGE /bin/bash
+	docker run -it -e 'TZ=Europe/Rome' --name $NAME -v $VOLUME:/outside $DOCKEROPT $IMAGE /bin/zsh
 elif [ -n "$IMAGE" ] && [ -n "$NAME" ]; then
-	docker run -it -e 'TZ=Europe/Rome' --name $NAME $DOCKEROPT $IMAGE /bin/bash
+	docker run -it -e 'TZ=Europe/Rome' --name $NAME $DOCKEROPT $IMAGE /bin/zsh
 else
 	echo "
 		USAGE:
