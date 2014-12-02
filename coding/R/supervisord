@@ -1,0 +1,6 @@
+[supervisord]
+nodaemon=true
+
+[program:rstudio-server]
+command=/usr/sbin/rstudio-server start
+autorestart=true
