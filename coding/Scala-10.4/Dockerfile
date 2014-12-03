@@ -1,6 +1,6 @@
 FROM centos:centos7
 RUN  yum install -y epel-release
-RUN  yum update -y && yum install -y git unzip tar wget curl vim tmux
+RUN  yum update -y && yum install -y git zsh unzip tar wget curl vim tmux
 
 #versions
 ENV JDK_RPM jdk-7u67-linux-x64.rpm
@@ -35,6 +35,6 @@ RUN git config --global user.email francesco.strozzi@gmail.com
 # set tmux aliases and configuration
 RUN curl https://raw.githubusercontent.com/fstrozzi/dockerfiles/master/coding/tmux.conf > /root/.tmux.conf
 # zsh
-RUN yum -y install zsh && curl -L http://install.ohmyz.sh | sh
+RUN curl -L http://install.ohmyz.sh | sh
 RUN curl https://raw.githubusercontent.com/fstrozzi/dockerfiles/master/coding/zshrc > /root/.zshrc
 CMD ["scala"]
