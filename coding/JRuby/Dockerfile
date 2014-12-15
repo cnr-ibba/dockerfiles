@@ -1,6 +1,6 @@
 FROM centos:centos7
 RUN yum install -y epel-release
-RUN yum update -y && yum install -y git zsh unzip tar wget curl vim tmux
+RUN yum update -y && yum install -y git zsh unzip tar wget curl vim tmux the_silver_searcher
 
 #versions
 ENV JDK_RPM jdk-7u67-linux-x64.rpm

@@ -1,6 +1,6 @@
 FROM centos:centos7
 RUN  yum install -y epel-release
-RUN  yum update -y && yum install -y git zsh unzip tar wget curl vim tmux
+RUN  yum update -y && yum install -y the_silver_searcher git zsh unzip tar wget curl vim tmux
 
 #versions
 ENV JDK_RPM jdk-7u67-linux-x64.rpm
@@ -37,4 +37,5 @@ RUN curl https://raw.githubusercontent.com/fstrozzi/dockerfiles/master/coding/tm
 # zsh
 RUN curl -L http://install.ohmyz.sh | sh
 RUN curl https://raw.githubusercontent.com/fstrozzi/dockerfiles/master/coding/zshrc > /root/.zshrc
+RUN curl https://raw.githubusercontent.com/fstrozzi/scala-toolbox/master/scripts/stbx > /usr/local/bin/stbx && chmod +x /usr/local/bin/stbx
 CMD ["scala"]

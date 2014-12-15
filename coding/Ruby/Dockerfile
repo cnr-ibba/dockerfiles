@@ -1,6 +1,6 @@
 FROM centos:centos7
 RUN  yum install -y epel-release
-RUN  yum update -y && yum install -y git zsh libffi-devel autoconf gcc make unzip tar wget curl vim tmux bison openssl-devel readline-devel
+RUN  yum update -y && yum install -y the_silver_searcher git zsh libffi-devel autoconf gcc make unzip tar wget curl vim tmux bison openssl-devel readline-devel
 
 # Installing Ruby
 
