@@ -36,9 +36,6 @@ RUN apt-get install -y neo4j
 # Clean up APT when done.
 RUN apt-get clean && apt-get autoclean && rm -rf /tmp/* /var/tmp/*
 
-# Copy supervisord configuration file
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 # Instructions for ssh found here: https://docs.docker.com/examples/running_ssh_service/
 RUN mkdir /var/run/sshd
 RUN echo 'root:neo4j' | chpasswd
@@ -52,12 +49,22 @@ RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so
 # If you're setting values in the Dockerfile using ENV, you'll need to push them to a shell
 # initialization file like the /etc/profile example in the Dockerfile above.
 
-If you need to passdocker run -e ENV=value values, you will need to write a short script to do the same before you start sshd -D and then replace the CMD with that script.
+# If you need to passdocker run -e ENV=value values, you will need to write a short
+# script to do the same before you start sshd -D and then replace the CMD with that script.
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
 # Ports to expose outside
-EXPOSE 22 7474 
+EXPOSE 22 7474
+
+# Create a VOLUME for data directory
+VOLUME /var/lib/neo4j/data
+
+# Copy supervisord configuration file
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Copy neo4j configuration file
+COPY neo4j-server.properties /etc/neo4j/neo4j-server.properties
 
 # Running all my processes
 CMD ["/usr/bin/supervisord"]
