@@ -6,11 +6,8 @@
 # TO_BUILD:       docker build --rm -t paolo/registry:latest .
 # TO_RUN:         docker run -d -p 5000:5000 paolo/registry:latest
 
-# Get my updated (and fixed) image
-FROM paolo/registry:fixed
-
-# Fix toolkit.py
-# COPY toolkit.py /usr/local/lib/python2.7/dist-packages/docker_registry/toolkit.py
+# get the last registry image
+FROM registry:latest
 
 # This are environment variables to use docker registry
 ENV STANDALONE false
@@ -19,5 +16,8 @@ ENV MIRROR_SOURCE_INDEX https://index.docker.io
 
 # The internal port to expose
 EXPOSE 5000
+
+# Create a VOLUME for data directory
+VOLUME /tmp/registry
 
 CMD ["docker-registry"]
