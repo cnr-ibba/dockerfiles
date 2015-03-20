@@ -55,7 +55,7 @@ ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
 # Ports to expose outside
-EXPOSE 22 7474
+EXPOSE 22 7473 7474
 
 # Create a VOLUME for data directory
 VOLUME /var/lib/neo4j/data
