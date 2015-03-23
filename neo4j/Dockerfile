@@ -54,17 +54,17 @@ RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
-# Ports to expose outside
-EXPOSE 22 7473 7474
-
-# Create a VOLUME for data directory
-VOLUME /var/lib/neo4j/data
-
 # Copy supervisord configuration file
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy neo4j configuration file
 COPY neo4j-server.properties /etc/neo4j/neo4j-server.properties
+
+# Create a VOLUME for data directory
+VOLUME /var/lib/neo4j/data
+
+# Ports to expose outside
+EXPOSE 22 7473 7474
 
 # Running all my processes
 CMD ["/usr/bin/supervisord"]
