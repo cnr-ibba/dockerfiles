@@ -24,7 +24,7 @@ shopt -s cmdhist
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTFILESIZE=5000
 HISTSIZE=5000
-#HISTTIMEFORMAT='%F %T '
+HISTTIMEFORMAT='%F %T '
 HISTIGNORE="ls:ll:exit:clear:cd:top:htop*:history*:rm*"
 
 # check the window size after each command and, if necessary,

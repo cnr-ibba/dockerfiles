@@ -24,23 +24,22 @@ RUN apt-get install -y vim
 # RUN apt-get clean && apt-get autoclean && rm -rf /tmp/* /var/tmp/*
 
 # Add a new user
-RUN groupadd -g 1000 paolo
-RUN useradd --uid 1000 --gid 1000 -m --shell /bin/bash paolo
+RUN useradd -m developer 
 
 # Setting useful environment variables
-WORKDIR /home/paolo
+WORKDIR /home/developer
 
 # overwrite .bashrc
-COPY bashrc /home/paolo/.bashrc
-COPY vimrc /home/paolo/.vimrc
-copy gitconfig /home/paolo/.gitconfig
-RUN chown paolo: .bashrc .vimrc .gitconfig
+COPY bashrc /home/developer/.bashrc
+COPY vimrc /home/developer/.vimrc
+copy gitconfig /home/developer/.gitconfig
+RUN chown developer: .bashrc .vimrc .gitconfig
 
 # Set home directory as VOLUME
-VOLUME /home/paolo
+VOLUME /home/developer
 
 # Setting the user
-USER paolo
+USER developer
 
 # default command to reattach istance
 CMD ["/bin/bash"]
