@@ -17,24 +17,30 @@ WORKDIR	/root
 # clean up andystanton cmake install directory
 RUN rm -rf /cmake-3.0.2/ && rm -f /cmake-3.0.2.tar.gz
 
+# install vim
+RUN apt-get install -y vim
+
 # Clean up APT cache
 # RUN apt-get clean && apt-get autoclean && rm -rf /tmp/* /var/tmp/*
 
 # Add a new user
 RUN groupadd -g 1000 paolo
-RUN useradd --uid 1000 --gid 1000 --home /home/paolo --shell /bin/bash paolo
-
-# Create user directory and set ownership
-RUN mkdir /home/paolo && chown -R paolo: /home/paolo
-
-# Setting the user
-USER paolo
+RUN useradd --uid 1000 --gid 1000 -m --shell /bin/bash paolo
 
 # Setting useful environment variables
 WORKDIR /home/paolo
 
+# overwrite .bashrc
+COPY bashrc /home/paolo/.bashrc
+COPY vimrc /home/paolo/.vimrc
+copy gitconfig /home/paolo/.gitconfig
+RUN chown paolo: .bashrc .vimrc .gitconfig
+
 # Set home directory as VOLUME
 VOLUME /home/paolo
 
-#run openssh server
+# Setting the user
+USER paolo
+
+# default command to reattach istance
 CMD ["/bin/bash"]
