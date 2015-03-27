@@ -52,13 +52,6 @@ RUN echo "export VISIBLE=now" >> /etc/profile
 # Free spaces (disabled at the moment)
 # RUN yum clean all
 
-# Setting locales: http://jaredmarkell.com/docker-and-locales/
-# RUN localectl set-locale LANG=it_IT.UTF-8 && localectl set-keymap it2
-RUN localectl set-locale LANG=it_IT.UTF-8
-ENV LANG it_IT.UTF-8
-ENV LANGUAGE it_IT.it
-ENV LC_ALL en_US.UTF-8  
-
 # Ports to expose. At least the 22 ssh port
 EXPOSE 22
 
@@ -69,5 +62,5 @@ EXPOSE 22
 VOLUME [ "/sys/fs/cgroup" ]
 
 # find here https://github.com/2k0ri/docker-centos7-systemd.git. This is a symbolick
-# link to /lib/systemd/systemd (also "/usr/sbin/init)
-CMD ["/sbin/init", "3"]
+# link to /lib/systemd/systemd (also /sbin/init)
+CMD ["/usr/sbin/init"]
