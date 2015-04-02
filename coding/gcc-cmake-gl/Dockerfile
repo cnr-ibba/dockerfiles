@@ -1,5 +1,5 @@
 
-# VERSION 0.2
+# VERSION 0.3
 # DOCKER-VERSION  1.3.2
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    A bleeding edge Ubuntu 14.04 image for compiling C++11 OpenGL projects with openssh server
@@ -20,7 +20,8 @@ RUN rm -rf /cmake-3.0.2/ && rm -f /cmake-3.0.2.tar.gz
 # install vim and bash completion
 RUN apt-get install -y vim \
 	git-core \
-	bash-completion
+	bash-completion \
+	unzip
 
 # Clean up APT cache
 # RUN apt-get clean && apt-get autoclean && rm -rf /tmp/* /var/tmp/*
