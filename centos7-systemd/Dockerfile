@@ -1,11 +1,12 @@
 
 #
-# VERSION 0.1
+# VERSION 0.2
 # DOCKER-VERSION  1.3.2
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    A centos 7 base image with systemd support
 # TO_BUILD:       docker build --rm -t bunop/centos7-systemd:test .
 # TO_RUN:         docker run -d -P --privileged --cap-add=ALL -v /sys/fs/cgroup:/sys/fs/cgroup:ro bunop/centos7-systemd:test
+# TO_TAG:         docker tag bunop/centos7-systemd:latest bunop/centos7-systemd:0.2
 #
 
 # I've found some useful post to run a systemd in privileged containers
@@ -20,13 +21,27 @@ FROM centos:centos7
 MAINTAINER Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 
 # systemd likes to know that it is running within a container, and it checks the container
-# environment variable for this.  The ENV will cause the “container” environment variable to be set.
+# environment variable for this.  The ENV will cause the container" environment variable to be set.
 ENV container docker
 
 # find here https://github.com/2k0ri/docker-centos7-systemd.git
 # This will substitute the default systemd of docker-centos7 container with a full
 # systemd with all its capabilities
 RUN yum swap -y fakesystemd systemd
+
+# Found here: https://rhatdan.wordpress.com/2014/04/30/running-systemd-within-a-docker-container/
+RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+	rm -f /lib/systemd/system/multi-user.target.wants/*;\
+	rm -f /etc/systemd/system/*.wants/*;\
+	rm -f /lib/systemd/system/local-fs.target.wants/*; \
+	rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+	rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+	rm -f /lib/systemd/system/basic.target.wants/*;\
+	rm -f /lib/systemd/system/anaconda.target.wants/*;
+
+# Found here http://www.brad-x.com/2014/12/27/running-systemd-within-a-docker-image/ (is a centos7 systemd image)
+RUN systemctl mask getty.target swap.target
+RUN systemctl disable graphical.target; systemctl enable multi-user.target
 
 # Install and enable SSHD service
 RUN yum -y install openssh-server \

@@ -25,7 +25,7 @@ $ ssh -p 49166 root@localhost
 Once inside a container, we have to do some steps:
 
 ```sh
-$ yum -y install ypbind rpcbind authconfig hostname
+$ yum -y install ypbind rpcbind authconfig hostname oddjob-mkhomedir
 $ ypdomainname BIOINFORMATICS
 $ echo "NISDOMAIN=BIOINFORMATICS" >> /etc/sysconfig/network
 $ echo -e "192.168.13.41\tlogin.bioinformatics.tecnoparco.org" >> /etc/hosts
