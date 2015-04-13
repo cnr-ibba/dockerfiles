@@ -21,7 +21,7 @@ RUN yum groupinstall -y "Development Tools"
 
 RUN yum install -y \
     autoconf \
-    imagemagick \
+    ImageMagick \
     bzip2-devel \
     libcurl-devel \
     openssl-devel \
@@ -40,7 +40,8 @@ RUN yum install -y \
     libxml2-devel \
     libxslt-devel \
     libyaml-devel \
-    zlib-devel 
+    zlib-devel \
+    gcc-c++
 
 # Free spaces
 RUN yum clean all
