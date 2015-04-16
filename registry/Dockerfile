@@ -3,8 +3,8 @@
 # DOCKER-VERSION  1.3.2
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    Run image in our environment at tecnoparco
-# TO_BUILD:       docker build --rm -t paolo/registry:latest .
-# TO_RUN:         docker run -d -p 5000:5000 paolo/registry:latest
+# TO_BUILD:       docker build --rm -t bunop/registry:latest .
+# TO_RUN:         docker run -d -p 5000:5000 --restart=on-failure:5 --name docker-registry bunop/registry:latest
 
 # get the last registry image
 FROM registry:latest
