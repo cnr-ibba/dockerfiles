@@ -1,12 +1,12 @@
 
 #
-# VERSION 0.2
-# DOCKER-VERSION  1.3.2
+# VERSION 2.7.9
+# DOCKER-VERSION  1.5.0
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    A python 2.7 image working on  login.bioinformatics.tecnoparco.org using systemd
 # TO_BUILD:       docker build --rm -t bunop/cluster-python .
 # TO_RUN:         docker run -d -P --privileged --cap-add=ALL -v /sys/fs/cgroup:/sys/fs/cgroup:ro bunop/cluster-python
-# TO_TAG:         docker tag bunop/cluster-python:latest bunop/cluster-python:0.2
+# TO_TAG:         docker tag bunop/cluster-python:latest bunop/cluster-python:2.7.9
 #
 
 FROM bunop/buildpack-deps-cluster:0.2

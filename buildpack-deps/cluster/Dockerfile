@@ -1,7 +1,7 @@
 
 #
 # VERSION 0.2
-# DOCKER-VERSION  1.3.2
+# DOCKER-VERSION  1.5.0
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    An image like buildpack-deps/jessie/Dockerfile
 # TO_BUILD:       docker build --rm -t bunop/buildpack-deps-cluster .
@@ -49,7 +49,7 @@ RUN yum install -y \
     gdbm-devel \
     tk-devel \
     db4-devel \
-    libpcap-devel \
+    libpcap-devel 
     
 # Free spaces
 RUN yum clean all

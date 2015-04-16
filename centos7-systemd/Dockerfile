@@ -1,11 +1,11 @@
 
 #
 # VERSION 0.2
-# DOCKER-VERSION  1.3.2
+# DOCKER-VERSION  1.5.0
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    A centos 7 base image with systemd support
-# TO_BUILD:       docker build --rm -t bunop/centos7-systemd:test .
-# TO_RUN:         docker run -d -P --privileged --cap-add=ALL -v /sys/fs/cgroup:/sys/fs/cgroup:ro bunop/centos7-systemd:test
+# TO_BUILD:       docker build --rm -t bunop/centos7-systemd .
+# TO_RUN:         docker run -d -P --privileged --cap-add=ALL -v /sys/fs/cgroup:/sys/fs/cgroup:ro bunop/centos7-systemd
 # TO_TAG:         docker tag bunop/centos7-systemd:latest bunop/centos7-systemd:0.2
 #
 

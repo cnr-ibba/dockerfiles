@@ -56,9 +56,17 @@ Now edit the rc.local script to add the following line:
 echo -e "192.168.13.41\tlogin.bioinformatics.tecnoparco.org" >> /etc/hosts
 ```
 
+## Clean package metadata to save space
+
+Now clean all yum metadata to save space
+
+```sh
+$ yum clean all
+```
+
 ## restart docker container and test it
 
-Now log out, shutdown the container and restart it. Then gent the new ssh port and test NIS configuration:
+Now log out, shutdown the container and restart it. Then get the new ssh port and test NIS configuration:
 
 ```sh
 $ docker stop systemd
@@ -72,5 +80,14 @@ where `49173` is the port published from the container to the host. Once logged,
 Next log out or shutdown the system (you have installed a full systemd image). The commit the container to local docker repository:
 
 ```sh
-docker commit -a "Paolo Cozzi" -m "Centos 7 + systemd + NIS client configured" systemd bunop/centos7-nis
+$ docker commit -a "Paolo Cozzi" -m "Centos 7 + systemd + NIS client configured" systemd bunop/centos7-nis
+```
+
+## Create the base cluster image (to work on PTP infrastructure)
+
+Now build a full cluster image with such commands:
+
+```sh
+$ docker build --rm -t bunop/cluster .
+$ docker tag bunop/cluster:latest bunop/cluster:0.3
 ```

@@ -1,7 +1,7 @@
 
 #
 # VERSION 0.1
-# DOCKER-VERSION  1.3.2
+# DOCKER-VERSION  1.5.0
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    An image like buildpack-deps/jessie/curl/Dockerfile
 # TO_BUILD:       docker build --rm -t bunop/buildpack-deps-cluster-curl .

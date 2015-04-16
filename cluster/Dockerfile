@@ -1,7 +1,7 @@
 
 #
 # VERSION 0.3
-# DOCKER-VERSION  1.3.2
+# DOCKER-VERSION  1.5.0
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    A centos 7 base image with NIS configured on login.bioinformatics.tecnoparco.org using systemd
 # TO_BUILD:       docker build --rm -t bunop/cluster .
