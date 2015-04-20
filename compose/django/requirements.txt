@@ -1,2 +1,1 @@
-Django
-psycopg2
+# django, mysql and postgres driver are already installed in django:1.8-python3 image
