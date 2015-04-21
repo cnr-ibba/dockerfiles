@@ -10,7 +10,7 @@ db:
     
 web:
   build: ./web
-  command: python mysite/manage.py runserver 0.0.0.0:8000
+  command: python manage.py runserver 0.0.0.0:8000
   working_dir: /var/uwsgi/
   volumes:
     - "django-data/:/var/uwsgi/"

@@ -34,4 +34,36 @@ Next, you can shut down the MySQL running container, in order to control it via 
 $ docker stop django_db_run_1
 ```
 
-Now you can build the django image from its `Dockerfile` or 
+Now you can build the django image from its `Dockerfile` or build it automatically with `django-admin.py`. In this case, we initialize a new project and we build a new docker image if it not exists (note the final `.`: is the destination directory):
+
+```sh
+$ docker-compose run web django-admin.py startproject mysite .
+```
+
+Now you need to set up the database connection. Replace the DATABASES = ... definition in `django-data/mysite/settings.py`:
+
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mysite',
+        'USER': 'django',
+        'PASSWORD': 'django',
+        'HOST': 'db',
+        'PORT': 3306,
+    }
+}
+```
+
+Note that the `db` host is the same name used in `docker-compose.yml`. User, database and password are the same specified in the example above. Now start database and django (in daemonized mode):
+
+```sh
+$ docker-compose up -d 
+```
+
+You can also run management commands with Docker. To set up your database, for example, run docker-compose up and in another terminal run:
+
+```sh
+$ docker-compose run web python manage.py syncdb
+```
+
