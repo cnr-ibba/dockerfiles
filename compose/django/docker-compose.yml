@@ -10,11 +10,10 @@ db:
     
 web:
   build: ./web
-  command: python manage.py runserver 0.0.0.0:8000
-  working_dir: /home/django
-  user: django
-  #volumes:
-  #  - "django-data:/home/django"
+  command: python mysite/manage.py runserver 0.0.0.0:8000
+  working_dir: /var/uwsgi/
+  volumes:
+    - "django-data/:/var/uwsgi/"
   ports:
     - "8000"
   links:
