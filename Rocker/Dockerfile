@@ -37,6 +37,17 @@ RUN addgroup --gid 516 giannicor && \
     adduser giannicor --uid 516 --gid 516 --disabled-password --gecos "Riccardo Giannico" && \
     echo 'giannicor:giannicor' | chpasswd
 
+# Another user
+RUN addgroup --gid 506 delcorvom && \
+    adduser delcorvom --uid 506 --gid 506 --disabled-password --gecos "Marcello DelCorvo" && \
+    echo 'delcorvom:delcorvom' | chpasswd
+
+# Another user
+RUN addgroup --gid 521 biffanis && \
+    adduser biffanis --uid 521 --gid 521 --disabled-password --gecos "Stefano Biffani" && \
+    echo 'biffanis:biffanis' | chpasswd
+
+    
 # Add other users here...
 
 # Instructions for ssh found here: https://docs.docker.com/examples/running_ssh_service/
