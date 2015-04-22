@@ -10,11 +10,23 @@ db:
     
 web:
   build: ./web
-  command: python manage.py runserver 0.0.0.0:8000
+  command: uwsgi --socket :8000 --module mysite.wsgi
   working_dir: /var/uwsgi/
   volumes:
     - "django-data/:/var/uwsgi/"
-  ports:
+  #Expose ports without publishing them to the host machine
+  expose:
     - "8000"
   links:
     - db
+
+nginx:
+    # get the latest nginx image
+    build: ./nginx
+    volumes_from:
+      - web
+    ports:
+      - "10080:80"
+    links:
+      - web
+    
