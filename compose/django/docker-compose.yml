@@ -20,13 +20,23 @@ web:
   links:
     - db
 
+php:
+  build: ./php
+  #default command in php container
+  expose:
+    - "9000"
+  links:
+    - db
+    
 nginx:
-    # get the latest nginx image
-    build: ./nginx
-    volumes_from:
-      - web
-    ports:
-      - "10080:80"
-    links:
-      - web
+  # get the latest nginx image
+  build: ./nginx
+  volumes_from:
+    - web
+    - php
+  ports:
+    - "10080:80"
+  links:
+    - web
+    - php
     
