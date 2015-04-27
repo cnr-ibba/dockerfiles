@@ -61,7 +61,12 @@ Note that the `db` host is the same name used in `docker-compose.yml`. User, dat
 
 ## Create phpMyAdmin container
 
-Blah, Blah
+mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -pmy-secret-pw
+
+```mysql
+mysql> GRANT SELECT, INSERT, UPDATE, DELETE ON phpmyadmin.* TO 'pma'@'%'  IDENTIFIED BY 'pmapass';
+mysql> \. create_tables.sql
+```
 
 ## Create NGINX container
 

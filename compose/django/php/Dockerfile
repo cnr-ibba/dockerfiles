@@ -1,12 +1,12 @@
 
 #
-# VERSION 0.1
+# VERSION 0.2
 # DOCKER-VERSION  1.5.0
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    A nginx container to work with phpmyadmin
 # TO_BUILD:       docker build --rm -t django_php .
 # TO_RUN:         docker run -d -P django_php
-# TO_TAG:         docker tag django_php:latest django_php:0.1
+# TO_TAG:         docker tag django_php:latest django_php:0.2
 #
 
 # Starting from the example seen at: https://registry.hub.docker.com/_/php/
@@ -20,16 +20,33 @@ RUN apt-get update && apt-get install -y \
         libjpeg62-turbo-dev \
         libmcrypt-dev \
         libpng12-dev \
+        bzip2 \
+        libbz2-dev \
     && docker-php-ext-install iconv mcrypt \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install gd
+    && docker-php-ext-install gd \
+    && docker-php-ext-install mbstring \
+    && docker-php-ext-install mysqli \
+    && docker-php-ext-install zip \
+    && docker-php-ext-install bz2
 
 # Install phpmyadmin
+ENV PHPMYADMIN_VERSION 4.4.4
 
-# Clean packages
+# Downloading latest phpmyadmin distribution and extract archive, rename directory and remove tar file
+RUN curl -SL http://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/${PHPMYADMIN_VERSION}/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz -o phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz \
+    && tar -xvzf phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz \
+    && mv phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages phpmyadmin \
+    && rm phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz
 
-# Override default configuration
+# Clean packages and histories
+RUN apt-get clean && rm -rf /var/lib/apt/lists/
+
+# Override php-fpm default configuration
 COPY php-fpm.conf /usr/local/etc/
+
+# Set the phpMyAdmin config file
+COPY config.inc.php /var/www/html/phpmyadmin/
 
 # docker volumes
 VOLUME /var/www/html
