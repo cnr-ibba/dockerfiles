@@ -10,7 +10,7 @@ db:
     
 web:
   build: ./web
-  command: uwsgi --socket :8000 --module mysite.wsgi
+  command: uwsgi --socket :8000 --module mysite.wsgi --buffer-size=32768
   working_dir: /var/uwsgi/
   volumes:
     - "django-data/:/var/uwsgi/"

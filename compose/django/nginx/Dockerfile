@@ -15,4 +15,6 @@ FROM nginx:1.7
 MAINTAINER Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 
 # Copy nginx configuration file in conf.d directory
+COPY nginx.conf /etc/nginx/nginx.conf
 COPY mysite_nginx.conf /etc/nginx/conf.d/default.conf
+

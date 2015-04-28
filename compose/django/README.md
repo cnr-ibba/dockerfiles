@@ -64,6 +64,8 @@ Note that the `db` host is the same name used in `docker-compose.yml`. User, dat
 mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -pmy-secret-pw
 
 ```mysql
+$ docker run -it --link django_db_1:mysql --volumes-from django_php_1 --rm mysql /bin/bash 
+root@3aa176c034ee:/# cd /var/www/html/phpmyadmin/
 mysql> GRANT SELECT, INSERT, UPDATE, DELETE ON phpmyadmin.* TO 'pma'@'%'  IDENTIFIED BY 'pmapass';
 mysql> \. create_tables.sql
 ```
