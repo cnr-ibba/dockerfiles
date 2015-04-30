@@ -1,12 +1,12 @@
 
 #
-# VERSION 0.2
+# VERSION 0.3
 # DOCKER-VERSION  1.5.0
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    A nginx container to work with phpmyadmin
 # TO_BUILD:       docker build --rm -t django_php .
 # TO_RUN:         docker run -d -P django_php
-# TO_TAG:         docker tag django_php:latest django_php:0.2
+# TO_TAG:         docker tag django_php:latest django_php:0.3
 #
 
 # Starting from the example seen at: https://registry.hub.docker.com/_/php/
@@ -47,6 +47,10 @@ COPY php-fpm.conf /usr/local/etc/
 
 # Set the phpMyAdmin config file
 COPY config.inc.php /var/www/html/phpmyadmin/
+
+# Create a symbolik link in order to serve phpmyadmin under "/mysite" location
+RUN mkdir /var/www/html/mysite \
+	&& ln -s /var/www/html/phpmyadmin/ /var/www/html/mysite
 
 # docker volumes
 VOLUME /var/www/html
