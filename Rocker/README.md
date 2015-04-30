@@ -56,11 +56,14 @@ Those commands have been specified in `/etc/nginx/default.d/rstudio.conf` (in `/
 location /rstudio/ {
   rewrite ^/rstudio/(.*)$ /$1 break;
   proxy_pass http://localhost:8787;
-  proxy_redirect http://localhost:8787/ $scheme://$host/rstudio/;
+  
+  #with a redirect to $scheme://$http_host link are constructed using client host, 
+  so also tunnels works (eg. localhost:10080)
+  proxy_redirect http://localhost:8787/ $scheme://$http_host/rstudio/;
 }
 ```
 
-And then you can login tho rstudio page using this link (for instance): [http://192.168.13.7/rstudio/](http://192.168.13.7/rstudio/)
+And then you can login to the rstudio page using this link (for instance): [http://192.168.13.7/rstudio/](http://192.168.13.7/rstudio/)
 
 ## Override the default password
 
