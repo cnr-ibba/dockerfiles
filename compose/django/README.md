@@ -17,7 +17,7 @@ Those name will be placed in each container `/etc/hosts` files, so you can ping 
 
 ## Create the MySQL container
 
-When MySQL is started from a docker container, all data directories have to be created, so is preferred to start MySQL manually for the first time. I such way, we can set the MySQL root password for the first time. The container can be instantiated with `docker-compose run` by passing the MySQL root password by `MYSQL_ROOT_PASSWORD` as stated by [mysql docker documentation](https://registry.hub.docker.com/u/library/mysql/). 
+When MySQL is started from a docker container, all data directories have to be created, so is preferred to start MySQL manually for the first time. I such way, we can set the MySQL root password for the first time. The container can be instantiated with `docker-compose run` by passing the MySQL root password by `MYSQL_ROOT_PASSWORD` as stated by [mysql docker documentation](https://registry.hub.docker.com/u/library/mysql/). The last `db` word in this command line is the name of mysql container
 
 ```sh
 $ docker-compose run -d -e MYSQL_ROOT_PASSWORD=my-secret-pw db
@@ -28,10 +28,10 @@ Once MySQL is istantiated for the first time or `mysql-data` directory is create
 The `$MYSQL_ENV_MYSQL_ROOT_PASSWORD` must be the same password chosen when database was created. Once MySQL data files are created (you can inspecy MySQL logs with `docker logs`), connect to MySQL database and create database and users needed from MySQL connections. The MySQL container defined in `docker-compose.yml`, never expose a port outside. You can get a mysql client to this container by linking a new  container, for instance:
 
 ```sh
-$ docker run -it --link django_db_run_1:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
+$ docker run -it --link <mysql_running_container>:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 ```
 
-The `--link <mysql_running_container>:mysql` specifies the MySQL running container and an alias for this. Now create a database and a user for the django instance with permission to work on such database
+The `--link <mysql_running_container>:mysql` specifies the MySQL running container and an alias for this. You can get the running container names using `docker-compose ps` or `docker ps` command. Now create a database and a user for the django instance with permission to work on such database
 
 ```SQL
 mysql> CREATE DATABASE mysite ;
@@ -42,18 +42,47 @@ mylsq> exit;
 Next, you can shut down the MySQL running container, in order to control it via docker-compose. You can do it with a docker command:
 
 ```sh
-$ docker stop django_db_run_1
+$ docker stop <mysql_running_container>
 ```
+
+where `<mysql_running_container>` is the container in which mysql server is running. You can also remove the stopped running container: MySQL data directory was created inside `mysql-data` directory, which will be imported as a volume as it is in the next compose run. You never need to restart database from scratch until you have `mysql-data` directory.
+
+### Dumping data from database
+
+With the docker run command, you can do a `mysite` database dump:
+
+```sh
+$ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" --rm mysql sh -c 'exec mysqldump -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" mysite > /data/mysite_dump.sql'
+```
+
+Note as variables like `MYSQL_ROOT_PASSWORD="my-secret-pw"` are traslated with a prefix `MYSQL_ENV_` inside running container. Since in this example the default password is `my-secret-pw` you may not specify this environment variable inside the running container or by passing the `-e VARIABLE=VALUE` syntax. The dump will be write in the `/data` volumes directory, which is your current `$PWD` directory. The ownership of dump file is the same of the `$USER` in the running container.
 
 ### Loading data in database
 
-With the docker run command, you can import a `<file>.sql' file by adding its path as a docker volume, for instance, if you are in <file>.sql directory:
+With the docker run command, you can import a `<file>.sql' file by adding its path as a docker volume, for instance, if you are in `mysite_dump.sql` directory:
 
 ```sh
-$ docker run -it --link django_db_run_1:mysql -v $PWD:/data/ --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" < /data/<file>.sql"'
+$ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" < /data/mysite_dump.sql'
 ```
 
+### Removing stopped container
+
+Container started via `docker-compose run`  or `docker run` will be automatically removed when they are stopped if the `--rm` parameter is provided (however we can not give `--rm` parameter in `-d` detached mode). You have to stop running detached container and to remove them with `docker` commands like this:
+
+```sh
+$ docker stop <mysql_running_container>
+$ docker rm <mysql_running_container>
+```
+
+All data inside the `mysql-data` directory will remains.
+
 ## Create django container
+
+Django script will be served using the uwsgi server. You can get more informaton here:
+
+* [How to use Django with uWSGI](https://docs.djangoproject.com/en/1.8/howto/deployment/wsgi/uwsgi/)
+* [Django and NGINX](https://uwsgi.readthedocs.org/en/latest/tutorials/Django_and_nginx.html)
+* [uwsgi configuration](https://uwsgi.readthedocs.org/en/latest/Configuration.html) 
 
 ### Fixing Dokerfile and uwsgi.ini files
 
@@ -71,13 +100,13 @@ web/
 
 ### Creating a project for the first time
 
-For such example, we suppose that the django project name will be `mysite` as stated by the [django tutorial](https://docs.djangoproject.com/en/1.8/intro/tutorial01/#creating-a-project). Now you can build the django image from its `Dockerfile` or build it automatically with `docker-compose`. In this case, we initialize a new project and we build a new docker image if it not exists (note the final `mysite`: is the destination directory that will be placed under /var/uwsgi/):
+For such example, we suppose that the django project name will be `mysite` as stated by the [django tutorial](https://docs.djangoproject.com/en/1.8/intro/tutorial01/#creating-a-project). Now you can build the django image from its `Dockerfile` or build it automatically with `docker-compose`. In this case, we initialize a new project and we build a new docker image if it not exists (since we have not specified a destination directory, a `mysite` project directory is created and placed under /var/uwsgi/. Inside mysite, we will have `manage.py`):
 
 ```sh
-$ docker-compose run web django-admin.py startproject mysite mysite
+$ docker-compose run --rm web django-admin.py startproject mysite
 ```
 
-This will build the django image and runs the `django-admin.py` script. After that, the container stops and we return to the shell environment. Now we need to set up the database connection. Replace the DATABASES = ... definition in `django-data/mysite/settings.py`:
+This will build the django image and runs the `django-admin.py` script. If there are prerequisites, for example containers linked to that, they will be started before the `web` django container. After that, the container stops and we return to the shell environment. Now we need to set up the database connection. You may want change default ownership to edit files. Replace the DATABASES = ... definition in `django-data/mysite/settings.py` accordingly your project database settings:
 
 ```python
 DATABASES = {
@@ -92,7 +121,13 @@ DATABASES = {
 }
 ```
 
-Note that the `db` host is the same name used in `docker-compose.yml`. User, database and password are the same specified in the example above. We have to set also the static file positions. It's better to prepend the django project names in order to write rules to serve static files via ngnix. Here is an example for mysite project:
+Note that the `db` host is the same name used in `docker-compose.yml`. User, database and password are the same specified in the example above. Remember to set the timezone: docker compose will export HOST /etc/localtime in read only mode, but it's better to set timezone also in django in order to have correct times:
+
+```python
+TIME_ZONE = 'Europe/Rome'
+```
+
+We have to set also the static file positions. It's better to prepend the django project names in order to write rules to serve static files via ngnix. Here is an example for mysite project:
 
 ```python
 # Static files (CSS, JavaScript, Images)
@@ -100,13 +135,15 @@ Note that the `db` host is the same name used in `docker-compose.yml`. User, dat
 STATIC_URL = '/mysite/static/'
 
 # collect all Django static files in the static folder
-STATIC_ROOT = os.path.join(BASE_DIR, "mysite", "static/")
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 ```
 
-The `STATIC_URL` variable will tell to django (uwsgi) how to define links to static files, and the `STATIC_ROOT` variable will set the position in which static files (as the admin .css files) will be placed. Now you have to call the `collectstatic` command in order to place the static files in their directories:
+The `STATIC_URL` variable will tell to django (uwsgi) how to define links to static files, and the `STATIC_ROOT` variable will set the position in which static files (as the admin .css files) will be placed. You may want to create a `/static/media` directory inside `mysite`, in order to place media files. Then you have to call the `collectstatic` command in order to place the static files in their directories:
 
 ```sh
-$ docker-compose run web python myiste/manage.py collectstatic
+$ mkdir django-data/mysite/static/
+$ mkdir django-data/mysite/media/
+$ docker-compose run --rm web python mysite/manage.py collectstatic
 ```
 
 #### Auto restart uwsgi when code is modified:
@@ -124,6 +161,16 @@ def change_code_gracefull_reload(sig):
         uwsgi.reload()
 ```
 
+#### Initialize django database for the first time
+
+You may want to run the following commands to create the necessary django table if django database is empty
+
+```sh
+$ docker-compose run web python mysite/manage.py syncdb
+```
+
+Take note of user and password of the privileged django user
+
 ### Add an existing project to django container
 
 The `django-data` directory need to be create if does't exists. Then you have to create a <project name> directory in which put the `manage.py`. Static files needs to be placed inside the <project name> directory, or links or static urls needs to be modified in order to be served correctly. For instance, to place a django project into a `mysite` directory:
@@ -133,10 +180,16 @@ $ mkdir -p django-data/mysite
 $ cp -r /a/django/project/ django-data/mysite/
 $ mkdir django-data/mysite/media
 $ mkdir django-data/mysite/static
-$ docker-compose run web python myiste/manage.py collectstatic
 ```
 
 ## Create phpMyAdmin container
+
+phpMyadmin will be served using `php-fpm` server. You can find some useful information here:
+
+* [phpMyAdmin installation](http://docs.phpmyadmin.net/en/latest/setup.html)
+* [FastCGI Process Manager (FPM)](http://php.net/manual/en/install.fpm.php)
+* [Nginx and PHP-FPM Configuration and Optimizing Tips and Tricks](http://www.if-not-true-then-false.com/2011/nginx-and-php-fpm-configuration-and-optimizing-tips-and-tricks/)
+* [Example configuration of php-fpm](https://github.com/perusio/php-fpm-example-config)
 
 First, take a look inside php directory:
 
@@ -148,17 +201,32 @@ php/
 └── php-fpm.conf
 ```
 
-In the `config.inc.php` there are parameter configuration in order to work with phpmyadmin. You may want to change the name of `$cfg['Servers'][$i]['verbose']` variable, in order to set the name of your project database name. The default database used by phpmyadmin control user is `phpmyadmin`. You can change the control user credential, if you preferer. Next you have to add phpmyadmin control user to your database and grant him his privileges. Start a container volume for phpmyadmin, and then link to your mysql running cointainer. You need to create a control user with the same credential specified in `config.inc.php`:
+In the `php-fpm.conf` there are some configuration for `php-fpm` process. You can change some parameters if you want, but this file is independent from your django instace. Instead in the `Dockerfile` there are this statement that need to be modified in order to work when proxy passing from a host server to docker-compose nginx. In such case `mysite` is the location in which I want to serve docker-compose phpmyadmin:
 
+```
+# Create a symbolik link in order to serve phpmyadmin under "/mysite" location
+RUN mkdir /var/www/html/mysite \
+    && ln -s /var/www/html/phpmyadmin/ /var/www/html/mysite
+```
+
+In `Dockerfile` all modules required by php application need to be installed using the `docker-php-ext-install` provied inside the container. If the build fails, you need to install all the dependancies via `apt-get` as stated in [How to install more PHP extensions](https://github.com/docker-library/docs/tree/master/php#how-to-install-more-php-extensions)
+
+In the `config.inc.php` there are parameter configuration in order to work with phpmyadmin. You may want to change the name of `$cfg['Servers'][$i]['verbose']` variable, in order to set the name of your project database name. The default database used by phpmyadmin control user is `phpmyadmin`. You can change the control user credential, if you prefer. Next you have to add phpmyadmin control user to your database, grant him his privileges and create phpmyadmin database and tables. Build the php volume for phpmyadmin: 
 
 ```sh
-$ docker create --name phpmyadmin_volume django_php /bin/true
+$ docker-compose build php
+```
+
+You now have an image, like the others with <project_name> as a prefix. You can see the exact name using `docker images | head`. Create a data-volume and then link it to a MySQL client image in order to do all stuff. You need to create a control user with the same credential specified in `config.inc.php`:
+
+```sh
+$ docker create --name phpmyadmin_volume <project_name>_php /bin/true
 $ docker run -it --link <mysql_running_container>:mysql --volumes-from phpmyadmin_volume --rm mysql /bin/bash 
 
-# inside the running container
+# inside the running container. The $MYSQL_ROOT_PASSWORD is not set when using /bin/bash !!!
 
 $ cd /var/www/html/phpmyadmin/sql
-$ mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"
+$ mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"my-secret-pw"
 mysql> CREATE DATABASE phpmyadmin;
 mysql> GRANT SELECT, INSERT, UPDATE, DELETE ON phpmyadmin.* TO 'pma'@'%'  IDENTIFIED BY 'pmapass';
 mysql> \. create_tables.sql
@@ -167,14 +235,6 @@ $ exit
 
 # clear unnecessary volumes
 $ docker rm phpmyadmin_volume
-```
-
-In the `php-fpm.conf` there are some configuration for `php-fpm` process. You can change some parameters if you want, but this file is independent from your django instace. Instead in the `Dockerfile` there are this statement that need to be modified in order to work when proxy passing from a host server to docker-compose nginx. In such case `mysite` is the location in which I want to serve docker-compose phpmyadmin:
-
-```
-# Create a symbolik link in order to serve phpmyadmin under "/mysite" location
-RUN mkdir /var/www/html/mysite \
-    && ln -s /var/www/html/phpmyadmin/ /var/www/html/mysite
 ```
 
 ## Create NGINX container
@@ -209,3 +269,14 @@ Container could be stopped and restarted via `docker-compose` compose. Even if c
 $ docker-compose run web python mysite/manage.py syncdb
 ```
 
+## Serving docker containers in docker HOST
+
+You can serve docker compose using HOST NGINX, for instance, via proxy_pass. Place the followin code inside NGINX server environment. Remember to specify the port exported by your docker NGINX instance:
+
+```
+location /mysite {
+    # Subitting a request to docker service
+    proxy_pass http://localhost:10080;
+    proxy_redirect http://localhost:10080/ $scheme://$http_host/;
+}
+```
