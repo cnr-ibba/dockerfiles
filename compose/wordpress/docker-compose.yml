@@ -1,0 +1,34 @@
+
+db:
+  # get the latest mysql server
+  image: mysql:5.6
+
+  # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
+  volumes:
+    - "mysql-data:/var/lib/mysql"
+    - "/etc/localtime:/etc/localtime:ro"
+
+php:
+  build: ./php
+  #default command in php container (see .php/Dockerfile)
+  volumes:
+    - "/etc/localtime:/etc/localtime:ro"
+  expose:
+    - "9000"
+  links:
+    - db
+    
+nginx:
+  # get the latest nginx image
+  build: ./nginx
+  volumes:
+    - "/etc/localtime:/etc/localtime:ro"
+  volumes_from:
+    - web
+    - php
+  ports:
+    - "10080:80"
+  links:
+    - web
+    - php
+    
