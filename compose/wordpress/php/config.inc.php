@@ -8,10 +8,10 @@
 /* Servers configuration */
 $i = 0;
 
-/* Server: django_db [1] */
+/* Server: mysql [1] */
 $i++;
-$cfg['Servers'][$i]['verbose'] = 'django_db';
-$cfg['Servers'][$i]['host'] = 'db';
+$cfg['Servers'][$i]['verbose'] = 'mysql';
+$cfg['Servers'][$i]['host'] = 'mysql';
 $cfg['Servers'][$i]['port'] = 3306;
 $cfg['Servers'][$i]['socket'] = '';
 $cfg['Servers'][$i]['ssl'] = false;
@@ -25,7 +25,7 @@ $cfg['Servers'][$i]['password'] = '';
  */
 
 /* User used to manipulate with storage */
-$cfg['Servers'][$i]['controlhost'] = 'db';
+$cfg['Servers'][$i]['controlhost'] = 'mysql';
 $cfg['Servers'][$i]['controlport'] = '3306';
 $cfg['Servers'][$i]['controluser'] = 'pma';
 $cfg['Servers'][$i]['controlpass'] = 'pmapass';

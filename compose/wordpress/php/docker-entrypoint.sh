@@ -139,7 +139,41 @@ if (!$mysql->query('CREATE DATABASE IF NOT EXISTS `' . $mysql->real_escape_strin
 	exit(1);
 }
 
+//create pma database
+if (!$mysql->query('CREATE DATABASE IF NOT EXISTS `phpmyadmin`')) {
+    fwrite($stderr, "\n" . 'MySQL "CREATE DATABASE" Error: ' . $mysql->error . "\n");
+    $mysql->close();
+    exit(1);
+}
+
+//add privileges to pma user
+if (!$mysql->query("GRANT SELECT, INSERT, UPDATE, DELETE ON phpmyadmin.* TO 'pma'@'%'  IDENTIFIED BY 'pmapass'")) {
+    fwrite($stderr, "\n" . 'MySQL "GRANT PRIVILEGES" Error: ' . $mysql->error . "\n");
+    $mysql->close();
+    exit(1);
+}
+
+
+//Execute a mysql file: http://php.net/manual/en/mysqli.multi-query.php
+$commands = file_get_contents("/usr/src/phpmyadmin/sql/create_tables.sql");
+
+if (!$mysql->multi_query($commands)) {
+    fwrite($stderr, "\n" . 'MySQL "Create Tables" Error: ' . $mysql->error . "\n");
+    $mysql->close();
+    exit(1);
+}
+
+
 $mysql->close();
 EOPHP
 
+if ! [ -e /var/www/html/phpmyadmin ]; then
+    echo >&2 "phpMyAdmin not found in $(pwd) - copying now..."
+    cp -ra /usr/src/phpmyadmin /var/www/html/
+    echo >&2 "Complete! phpMyAdmin has been successfully copied to $(pwd)"
+fi
+
+
+#Execute docker CMD
 exec "$@"
+
