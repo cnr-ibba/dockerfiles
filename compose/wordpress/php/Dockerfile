@@ -27,30 +27,33 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install zip \
     && docker-php-ext-install bz2
 
+# Clean packages and histories
+RUN apt-get clean && rm -rf /var/lib/apt/lists/
+    
 # Install phpmyadmin
 ENV PHPMYADMIN_VERSION 4.4.4
 
 # Downloading latest phpmyadmin distribution and extract archive, rename directory and remove tar file
-RUN curl -SL http://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/${PHPMYADMIN_VERSION}/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz -o phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz \
-    && tar -xvzf phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz \
-    && mv phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages phpmyadmin \
-    && rm phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz
-
-# Clean packages and histories
-RUN apt-get clean && rm -rf /var/lib/apt/lists/
+RUN curl -SL http://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/${PHPMYADMIN_VERSION}/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz -o /usr/src/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz \
+    && tar -xvzf /usr/src/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz -C /usr/src/ \
+    && mv /usr/src/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages /usr/src/phpmyadmin \
+    && rm /usr/src/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz \
+    && chown -R www-data:www-data /usr/src/phpmyadmin
 
 # Override php-fpm default configuration
 COPY php-fpm.conf /usr/local/etc/
 
-# Set the phpMyAdmin config file
-COPY config.inc.php /var/www/html/phpmyadmin/
-
-# Create a symbolik link in order to serve phpmyadmin under "/mysite" location
-RUN mkdir /var/www/html/mysite \
-	&& ln -s /var/www/html/phpmyadmin/ /var/www/html/mysite
+# Set the phpMyAdmin config file in src directory
+COPY config.inc.php /usr/src/phpmyadmin/
 
 # docker volumes
 VOLUME /var/www/html
+
+# Copy entrypoint (as wordpress base image)
+COPY docker-entrypoint.sh /entrypoint.sh
+
+# grr, ENTRYPOINT resets CMD now
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Execute commands. Such commands is executed under wordpress ENTRYPOINT
 CMD ["php-fpm"]
