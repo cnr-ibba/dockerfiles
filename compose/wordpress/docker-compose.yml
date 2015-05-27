@@ -3,6 +3,10 @@ db:
   # get the latest mysql server
   image: mysql:5.6
 
+  # Set db environment
+  environment:
+    MYSQL_ROOT_PASSWORD: my-secret-pw
+
   # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
   volumes:
     - "mysql-data:/var/lib/mysql"
@@ -15,8 +19,9 @@ php:
     - "/etc/localtime:/etc/localtime:ro"
   expose:
     - "9000"
+  #links container togheter
   links:
-    - db
+    - db:mysql
     
 nginx:
   # get the latest nginx image
@@ -24,11 +29,9 @@ nginx:
   volumes:
     - "/etc/localtime:/etc/localtime:ro"
   volumes_from:
-    - web
     - php
   ports:
     - "10080:80"
   links:
-    - web
     - php
     

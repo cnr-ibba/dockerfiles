@@ -9,12 +9,12 @@
 # TO_TAG:         docker tag django_php:latest django_php:0.3
 #
 
-# Starting from the example seen at: https://registry.hub.docker.com/_/php/
-FROM php:5.6-fpm
+# Starting from wordpress fpm (which derives from php:5.6.fpm)
+FROM wordpress:4.2.2-fpm
 
 MAINTAINER Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 
-# Install modules
+# Install modules (gd, iconv and mysqli are already installed in wordpress image)
 RUN apt-get update && apt-get install -y \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
@@ -22,11 +22,8 @@ RUN apt-get update && apt-get install -y \
         libpng12-dev \
         bzip2 \
         libbz2-dev \
-    && docker-php-ext-install iconv mcrypt \
-    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install gd \
+    && docker-php-ext-install mcrypt \
     && docker-php-ext-install mbstring \
-    && docker-php-ext-install mysqli \
     && docker-php-ext-install zip \
     && docker-php-ext-install bz2
 
@@ -55,5 +52,5 @@ RUN mkdir /var/www/html/mysite \
 # docker volumes
 VOLUME /var/www/html
 
-# Execute commands
+# Execute commands. Such commands is executed under wordpress ENTRYPOINT
 CMD ["php-fpm"]
