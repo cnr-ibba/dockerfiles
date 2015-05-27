@@ -22,6 +22,10 @@ php:
   #links container togheter
   links:
     - db:mysql
+
+  environment:
+    PROJECT_NAME: blog
+  
     
 nginx:
   # get the latest nginx image

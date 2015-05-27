@@ -1,7 +1,15 @@
 #!/bin/bash
 set -e
 
+# check that project name is defined
+if [ -z "$PROJECT_NAME" ]; then
+    echo >&2 "Error: missing PROJECT_NAME. You have to set up this variable in docker-compose.yml"
+    exit 1
+fi
+
+#True if the length of "STRING" is non-zero.
 if [ -n "$MYSQL_PORT_3306_TCP" ]; then
+    #True of the length if "STRING" is zero.
 	if [ -z "$WORDPRESS_DB_HOST" ]; then
 		WORDPRESS_DB_HOST='mysql'
 	else
@@ -34,17 +42,18 @@ if [ -z "$WORDPRESS_DB_PASSWORD" ]; then
 	exit 1
 fi
 
-if ! [ -e index.php -a -e wp-includes/version.php ]; then
-	echo >&2 "WordPress not found in $(pwd) - copying now..."
-	if [ "$(ls -A)" ]; then
-		echo >&2 "WARNING: $(pwd) is not empty - press Ctrl+C now if this is an error!"
+if ! [ -e $PROJECT_NAME/index.php -a -e $PROJECT_NAME/wp-includes/version.php ]; then
+	echo >&2 "WordPress not found in $(pwd)/$PROJECT_NAME - copying now..."
+	if [ "$(ls -A $PROJECT_NAME)" ]; then
+		echo >&2 "WARNING: $(pwd)$PROJECT_NAME is not empty - press Ctrl+C now if this is an error!"
 		( set -x; ls -A; sleep 10 )
 	fi
-	tar cf - --one-file-system -C /usr/src/wordpress . | tar xf -
-	echo >&2 "Complete! WordPress has been successfully copied to $(pwd)"
-	if [ ! -e .htaccess ]; then
+	mkdir $PROJECT_NAME
+	tar cf - --one-file-system -C /usr/src/wordpress . | tar xf - -C $PROJECT_NAME 
+	echo >&2 "Complete! WordPress has been successfully copied to $(pwd)/$PROJECT_NAME"
+	if [ ! -e $PROJECT_NAME/.htaccess ]; then
 		# NOTE: The "Indexes" option is disabled in the php:apache base image
-		cat > .htaccess <<-'EOF'
+		cat > $PROJECT_NAME/.htaccess <<-'EOF'
 			# BEGIN WordPress
 			<IfModule mod_rewrite.c>
 			RewriteEngine On
@@ -56,14 +65,14 @@ if ! [ -e index.php -a -e wp-includes/version.php ]; then
 			</IfModule>
 			# END WordPress
 		EOF
-		chown www-data:www-data .htaccess
+		chown www-data:www-data $PROJECT_NAME/.htaccess
 	fi
 fi
 
 # TODO handle WordPress upgrades magically in the same way, but only if wp-includes/version.php's $wp_version is less than /usr/src/wordpress/wp-includes/version.php's $wp_version
 
-if [ ! -e wp-config.php ]; then
-	awk '/^\/\*.*stop editing.*\*\/$/ && c == 0 { c = 1; system("cat") } { print }' wp-config-sample.php > wp-config.php <<'EOPHP'
+if [ ! -e $PROJECT_NAME/wp-config.php ]; then
+	awk '/^\/\*.*stop editing.*\*\/$/ && c == 0 { c = 1; system("cat") } { print }' $PROJECT_NAME/wp-config-sample.php > $PROJECT_NAME/wp-config.php <<'EOPHP'
 // If we're behind a proxy server and using HTTPS, we need to alert Wordpress of that fact
 // see also http://codex.wordpress.org/Administration_Over_SSL#Using_a_Reverse_Proxy
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
@@ -71,7 +80,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
 }
 
 EOPHP
-	chown www-data:www-data wp-config.php
+	chown www-data:www-data $PROJECT_NAME/wp-config.php
 fi
 
 set_config() {
@@ -79,7 +88,7 @@ set_config() {
 	value="$2"
 	php_escaped_value="$(php -r 'var_export($argv[1]);' "$value")"
 	sed_escaped_value="$(echo "$php_escaped_value" | sed 's/[\/&]/\\&/g')"
-	sed -ri "s/((['\"])$key\2\s*,\s*)(['\"]).*\3/\1$sed_escaped_value/" wp-config.php
+	sed -ri "s/((['\"])$key\2\s*,\s*)(['\"]).*\3/\1$sed_escaped_value/" $PROJECT_NAME/wp-config.php
 }
 
 set_config 'DB_HOST' "$WORDPRESS_DB_HOST"
@@ -105,7 +114,7 @@ for unique in "${UNIQUES[@]}"; do
 		set_config "$unique" "$unique_value"
 	else
 		# if not specified, let's generate a random value
-		current_set="$(sed -rn "s/define\((([\'\"])$unique\2\s*,\s*)(['\"])(.*)\3\);/\4/p" wp-config.php)"
+		current_set="$(sed -rn "s/define\((([\'\"])$unique\2\s*,\s*)(['\"])(.*)\3\);/\4/p" $PROJECT_NAME/wp-config.php)"
 		if [ "$current_set" = 'put your unique phrase here' ]; then
 			set_config "$unique" "$(head -c1M /dev/urandom | sha1sum | cut -d' ' -f1)"
 		fi
@@ -167,12 +176,11 @@ if (!$mysql->multi_query($commands)) {
 $mysql->close();
 EOPHP
 
-if ! [ -e /var/www/html/phpmyadmin ]; then
-    echo >&2 "phpMyAdmin not found in $(pwd) - copying now..."
-    cp -ra /usr/src/phpmyadmin /var/www/html/
-    echo >&2 "Complete! phpMyAdmin has been successfully copied to $(pwd)"
+if ! [ -e /var/www/html/$PROJECT_NAME/phpmyadmin ]; then
+    echo >&2 "phpMyAdmin not found in $(pwd)/$PROJECT_NAME - copying now..."
+    cp -ra /usr/src/phpmyadmin /var/www/html/$PROJECT_NAME/
+    echo >&2 "Complete! phpMyAdmin has been successfully copied to $(pwd)/$PROJECT_NAME"
 fi
-
 
 #Execute docker CMD
 exec "$@"
