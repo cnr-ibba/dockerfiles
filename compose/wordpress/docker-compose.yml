@@ -35,7 +35,7 @@ nginx:
   volumes_from:
     - php
   ports:
-    - "10080:80"
+    - "10080:10080"
   links:
     - php
     
