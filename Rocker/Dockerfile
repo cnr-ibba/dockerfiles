@@ -15,7 +15,11 @@ FROM rocker/rstudio
 MAINTAINER Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 
 # Install required packages to compile R libraries (and others utilities)
-RUN apt-get update && apt-get install -y libxml2-dev \
+# similar to https://registry.hub.docker.com/u/rocker/rstudio/dockerfile/
+RUN rm -rf /var/lib/apt/lists/ && \
+    apt-get update && \
+    apt-get install -y -t unstable --no-install-recommends \
+    libxml2-dev \
     apt-utils \
     apt-file \
     libmysqlclient-dev \
