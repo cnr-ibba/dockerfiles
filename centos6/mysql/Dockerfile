@@ -19,6 +19,9 @@ RUN yum install -y mysql-server
 # Initializing database
 RUN /usr/bin/mysql_install_db
 
+# Copy the configuration file
+COPY my.cnf /etc/my.cnf
+
 # expose mysql standard port
 EXPOSE 3306
 
