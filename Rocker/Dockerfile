@@ -7,7 +7,7 @@
 # TO_BUILD:       docker build --rm -t bunop/rstudio .
 # CREATE_VOLUME:  docker create --name rstudio_volume bunop/rstudio /bin/true
 # TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ bunop/rstudio
-# TO_TAG:         docker tag bunop/rstudio:latest bunop/rstudio:0.1
+# TO_TAG:         docker tag bunop/rstudio:latest bunop/rstudio:0.2
 #
 
 FROM rocker/rstudio

@@ -14,7 +14,7 @@ Log on login server (41) and get a lock at /etc/passwd (this file doesn't contai
 # --gecos GECOS
 #       Set  the  gecos field for the new entry generated.  adduser will
 #       not ask for finger information if this option is given.
-# The GECOS field is a comma separated list as such: Full name,Room number,Work phone,Home phone        
+# The GECOS field is a comma separated list as such: Full name,Room number,Work phone,Home phone
 RUN addgroup --gid 514 cozzip && \
     adduser cozzip --uid 514 --gid 514 --disabled-password --gecos "Paolo Cozzi" && \
     echo 'cozzip:cozzip' | chpasswd
@@ -26,24 +26,29 @@ Build a rocker image with a command like this:
 
 ```sh
 $ docker build --rm -t bunop/rstudio .
-$ docker tag bunop/rstudio:latest bunop/rstudio:0.1
+$ docker tag bunop/rstudio:latest bunop/rstudio:0.2
 ```
 
 ## Start the image with a data volume
 
-The data volume isn't required. Moreover it facilitates exporting users home directory between (rocker) containers. Start a new volume like this
+The data volume isn't required. Moreover it facilitates exporting users home directory between (rocker) containers.
+if you set an exististing directory insider a volume, you can access files outside containers. Start a new volume like this
 
 ```sh
-$ docker create --name rstudio_volume bunop/rstudio /bin/true
+$ docker create --name rstudio_volume \
+   -v /mnt/dell_storage/cloud/docker/rstudio_volume/:/home/ bunop/rstudio /bin/true
 ```
 
 Setting volume names facilitates process identification. Next start a new container using this volume. It could be nice also to export host localtime as stated [here](http://stackoverflow.com/questions/22800624/will-docker-container-auto-sync-time-with-the-host-machine)
 
 ```sh
-$ docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ bunop/rstudio
+$ docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume \
+   -v /etc/localtime:/etc/localtime:ro -v /mnt/dell_storage/storage/:/storage/ \
+   --cpuset-cpus=0-8 --memory="8G" bunop/rstudio
 ```
 
-the `-p` options set the standard rstudio port of the container on the host. It can be omitted with the `-P` options, and docker will bind the service on another port. The `-P` option is useful to export the openssh port of the container. You can inspect the port assigned by docker by using `docker ps` or `docker inspect -f '{{ json .NetworkSettings }}' rstudio | python -mjson.tool`. The first volume exported with the `-v` option is for the HOST localtime (RO mode). The second is the storage partition, which can be modified by each user (under authentication)
+the `-p` options set the standard rstudio port of the container on the host. It can be omitted with the `-P` options, and docker will bind the service on another port. The `-P` option is useful to export the openssh port of the container. With the `--cpuset-cpus` you can set a CPU interval in which the application can run. Unfortunately at the moment it seems impossible to set CPU dinamically. With the `--memory` option you can set the memory to allocate. You can specify a numeric value with a dimension like M for Mb, G for GB, and so on. More information about docker resource usage can be found [here](https://gist.github.com/afolarin/15d12a476e40c173bf5f). 
+You can inspect the port assigned by docker by using `docker ps` or `docker inspect -f '{{ json .NetworkSettings }}' rstudio | python -mjson.tool`. The first volume exported with the `-v` option is for the HOST localtime (RO mode). The second is the storage partition, which can be modified by each user (under authentication)
 
 If you need to rebuild the image you can re-use the previous rstudio data volumes (if the path exported is the same). Password will be resetted to their default values
 
@@ -56,14 +61,14 @@ Those commands have been specified in `/etc/nginx/default.d/rstudio.conf` (in `/
 location /rstudio/ {
   rewrite ^/rstudio/(.*)$ /$1 break;
   proxy_pass http://localhost:8787;
-  
-  #with a redirect to $scheme://$http_host link are constructed using client host, 
+
+  #with a redirect to $scheme://$http_host link are constructed using client host,
   so also tunnels works (eg. localhost:10080)
   proxy_redirect http://localhost:8787/ $scheme://$http_host/rstudio/;
 }
 ```
 
-And then you can login to the rstudio page using this link (for instance): [http://192.168.13.7/rstudio/](http://192.168.13.7/rstudio/)
+And then you can login to the rstudio page using this link (for instance): [http://192.168.13.150/rstudio/](http://192.168.13.150/rstudio/)
 
 ## Override the default password
 
