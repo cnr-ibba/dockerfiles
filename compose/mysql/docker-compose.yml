@@ -1,7 +1,7 @@
 
 db:
   # get the latest mysql server
-  image: mysql:5.6
+  build: ./db
 
   # Set db environment
   environment:
@@ -11,6 +11,7 @@ db:
   volumes:
     - "mysql-data:/var/lib/mysql"
     - "/etc/localtime:/etc/localtime:ro"
+    - "db/conf.d:/etc/mysql/conf.d"
 
 php:
   build: ./php
