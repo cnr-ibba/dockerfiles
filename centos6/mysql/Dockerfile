@@ -14,8 +14,10 @@ FROM centos:centos6
 MAINTAINER Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 
 # install MySQL Community
-RUN yum update -y && \
-    yum install -y mysql-server
+RUN yum update -y && yum install -y \
+    mysql-server \
+    bc \
+    which
 
 # Initializing database
 #RUN /usr/bin/mysql_install_db
@@ -25,6 +27,11 @@ COPY my.cnf /etc/my.cnf
 
 # Copy entrypoint
 COPY docker-entrypoint.sh /entrypoint.sh
+
+# Copy tuning primer scritpt inside /usr/local/bin
+COPY tuning-primer.sh /usr/local/bin/tuning-primer.sh
+
+ENV TERM linux
 
 # Define a volume
 VOLUME /var/lib/mysql
