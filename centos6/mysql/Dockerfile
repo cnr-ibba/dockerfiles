@@ -14,16 +14,26 @@ FROM centos:centos6
 MAINTAINER Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 
 # install MySQL Community
-RUN yum install -y mysql-server
+RUN yum update -y && \
+    yum install -y mysql-server
 
 # Initializing database
-RUN /usr/bin/mysql_install_db
+#RUN /usr/bin/mysql_install_db
 
 # Copy the configuration file
 COPY my.cnf /etc/my.cnf
 
+# Copy entrypoint
+COPY docker-entrypoint.sh /entrypoint.sh
+
+# Define a volume
+VOLUME /var/lib/mysql
+
 # expose mysql standard port
 EXPOSE 3306
+
+# Define a new entripoint
+ENTRYPOINT ["/entrypoint.sh"]
 
 # run mysql
 CMD ["/usr/bin/mysqld_safe"]
