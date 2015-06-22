@@ -61,8 +61,6 @@ CREATE USER 'user'@'%' IDENTIFIED BY 'some_pass';
 ```
 You can then grant privileges on specific databases.
 
-
-
 ## Running tuning-primer inside container
 
 Enter the container with `docker exec` and then type:
@@ -70,3 +68,21 @@ Enter the container with `docker exec` and then type:
 ```bash
 $ tuning-primer.sh
 ```
+
+## MySQL Benchmarking with Sysbench
+
+You can test MySQL performance with sysbench. You can find some tips [here](http://blog.flux7.com/blogs/benchmarks/using-sysbench-to-benchmark-mysql). First, you have to create a running MySQL container. Then you have to create at lest one user and grant him all privileges to the benchmarking database (the default test database is ok). Then you have to create benchmarking data inside database:
+
+```bash
+$ sysbench --test=oltp --oltp-table-size=1000000 --mysql-host=192.168.13.7 \
+  --mysql-port=49215 --mysql-db=test --mysql-user=paolo prepare
+```
+the `--test=oltp` is the MySQL test type (sysbench can test also memory and CPU). The `--oltp-table-size` is the dimension of the test table. You can set an higher value but you will need more time to fill the table with test data. Other options are the server in which the MySQL container run and the port listenig for MySQL connections. The final `prepare` command is the *fill data* step of this test. Then you can run test with a command line like this:
+
+```bash
+$ sysbench --test=oltp --oltp-table-size=1000000 --mysql-host=192.168.13.7 \
+  --mysql-port=49215 --mysql-db=test --mysql-user=paolo --oltp-test-mode=complex \
+  --num-threads=32 --max-time=60 --max-requests=10000 run
+```
+
+the `--oltp-test-mode` is a type of test in which each thread runs advanced transactional queries, including range queries, range SUM, range ORDER by, inserts and updates on index, as well as non-index columns, delete rows. The `--num-threads` is the number of threads used for the test (client side!). `--max-time` is a walltime for doing the whole test. The `--max-requests` is the number of request performed by each thread.
