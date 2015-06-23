@@ -25,7 +25,7 @@ RUN rm -rf /var/lib/apt/lists/ && \
     libmysqlclient-dev \
     libpq-dev \
     openssh-server \
-    vim 
+    vim
 
 # Clean packages and histories
 RUN apt-get clean && rm -rf /var/lib/apt/lists/
@@ -35,7 +35,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/
 # --gecos GECOS
 #       Set  the  gecos field for the new entry generated.  adduser will
 #       not ask for finger information if this option is given.
-# The GECOS field is a comma separated list as such: Full name,Room number,Work phone,Home phone        
+# The GECOS field is a comma separated list as such: Full name,Room number,Work phone,Home phone
 RUN addgroup --gid 514 cozzip && \
     adduser cozzip --uid 514 --gid 514 --disabled-password --gecos "Paolo Cozzi" && \
     echo 'cozzip:cozzip' | chpasswd
@@ -55,7 +55,11 @@ RUN addgroup --gid 521 biffanis && \
     adduser biffanis --uid 521 --gid 521 --disabled-password --gecos "Stefano Biffani" && \
     echo 'biffanis:biffanis' | chpasswd
 
-    
+# Another user: see hos gid is different from uid
+RUN addgroup --gid 1003 lazzarib && \
+    adduser lazzarib --uid 513 --gid 1003 --disabled-password --gecos "Barbara Lazzari" && \
+    echo 'lazzarib:lazzarib' | chpasswd
+
 # Add other users here...
 
 # Instructions for ssh found here: https://docs.docker.com/examples/running_ssh_service/
