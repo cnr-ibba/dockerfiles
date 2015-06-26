@@ -60,6 +60,11 @@ RUN addgroup --gid 1003 lazzarib && \
     adduser lazzarib --uid 513 --gid 1003 --disabled-password --gecos "Barbara Lazzari" && \
     echo 'lazzarib:lazzarib' | chpasswd
 
+# Another user: see hos gid is different from uid
+RUN addgroup --gid 527 fojadellii && \
+    adduser fojadellii --uid 527 --gid 527 --disabled-password --gecos "Ilaria Fojadelli" && \
+    echo 'fojadellii:fojadellii' | chpasswd
+
 # Add other users here...
 
 # Instructions for ssh found here: https://docs.docker.com/examples/running_ssh_service/
