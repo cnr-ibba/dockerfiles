@@ -6,6 +6,9 @@ db:
   # Set db environment
   environment:
     MYSQL_ROOT_PASSWORD: my-secret-pw
+  
+  ports:
+    - 3306
 
   # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
   volumes:

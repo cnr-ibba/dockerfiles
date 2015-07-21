@@ -1,4 +1,34 @@
 
 [mysqld]
+# Log slow queries. Slow queries are queries which take more than the
+# amount of time defined in "long_query_time" or which do not use
+# indexes well, if log_long_format is enabled. It is normally good idea
+# to have this turned on if you frequently add new queries to the
+# system.
 slow_query_log = 1
+
+# Dove vengono slavate
 slow_query_log_file = /var/lib/mysql/slow-queries.log
+
+# All queries taking more than this amount of time (in seconds) will be
+# trated as slow. Do not use "1" as a value here, as this will result in
+# even very fast queries being logged from time to time (as MySQL
+# currently measures time with second accuracy only).
+long_query_time = 5
+
+# Log more information in the slow query log. Normally it is good to
+# have this turned on. This will enable logging of queries that are not
+# using indexes in addition to long running queries.
+#log_short_format
+
+# If you are using this option with the slow query log enabled, queries that
+# are expected to retrieve all rows are logged. See Section 5.2.5, “The Slow Query Log”.
+# This option does not necessarily mean that no index is used. For example, a query
+# that uses a full index scan uses an index but would be logged because the index
+# would not limit the number of rows.
+#log_queries_not_using_indexes
+
+# Include slow administrative statements in the statements written to the slow
+# query log. Administrative statements include ALTER TABLE, ANALYZE TABLE,
+# CHECK TABLE, CREATE INDEX, DROP INDEX, OPTIMIZE TABLE, and REPAIR TABLE.
+log_slow_admin_statements = 1

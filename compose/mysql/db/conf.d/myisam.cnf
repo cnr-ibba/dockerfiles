@@ -1,0 +1,66 @@
+
+#
+# Variabili per MyISAM
+#
+
+[mysqld]
+
+# Size of the Key Buffer, used to cache index blocks for MyISAM tables.
+# Do not set it larger than 30% of your available memory, as some memory
+# is also required by the OS to cache rows. Even if you're not using
+# MyISAM tables, you should still set it to 8-64M as it will also be
+# used for internal temporary disk tables.
+key_buffer_size		= 256M
+
+# Size of the buffer used for doing full table scans of MyISAM tables.
+# Allocated per thread, if a full scan is needed.
+read_buffer_size = 4M
+
+# When reading rows in sorted order after a sort, the rows are read
+# through this buffer to avoid disk seeks. You can improve ORDER BY
+# performance a lot, if set this to a high value.
+# Allocated per thread, when needed.
+read_rnd_buffer_size = 8M
+
+# MyISAM uses special tree-like cache to make bulk inserts (that is,
+# INSERT ... SELECT, INSERT ... VALUES (...), (...), ..., and LOAD DATA
+# INFILE) faster. This variable limits the size of the cache tree in
+# bytes per thread. Setting it to 0 will disable this optimisation.  Do
+# not set it larger than "key_buffer_size" for optimal performance.
+# This buffer is allocated when a bulk insert is detected.
+bulk_insert_buffer_size = 64M
+
+# This buffer is allocated when MySQL needs to rebuild the index in
+# REPAIR, OPTIMIZE, ALTER table statements as well as in LOAD DATA INFILE
+# into an empty table. It is allocated per thread so be careful with
+# large settings.
+myisam_sort_buffer_size = 64M
+
+# The maximum size of the temporary file MySQL is allowed to use while
+# recreating the index (during REPAIR, ALTER TABLE or LOAD DATA INFILE.
+# If the file-size would be bigger than this, the index will be created
+# through the key cache (which is slower).
+myisam_max_sort_file_size = 10G
+
+# If the temporary file used for fast index creation would be bigger
+# than using the key cache by the amount specified here, then prefer the
+# key cache method.  This is mainly used to force long character keys in
+# large tables to use the slower key cache method to create the index.
+
+# If a table has more than one index, MyISAM can use more than one
+# thread to repair them by sorting in parallel. This makes sense if you
+# have multiple CPUs and plenty of memory.
+myisam_repair_threads = 1
+
+# Automatically check and repair not properly closed MyISAM tables.
+# Set the MyISAM storage engine recovery mode. The option value is any
+# combination of the values of OFF, DEFAULT, BACKUP, FORCE, or QUICK.
+# If you specify multiple values, separate them by commas. Specifying the
+# option with no argument is the same as specifying DEFAULT, and specifying
+# with an explicit value of "" disables recovery (same as a value of OFF). If recovery
+# is enabled, each time mysqld opens a MyISAM table, it checks whether the
+# table is marked as crashed or was not closed properly. (The last option works
+# only if you are running with external locking disabled.) If this is the case,
+# mysqld runs a check on the table. If the table was corrupted, mysqld attempts
+# to repair it.
+myisam_recover_options=DEFAULT

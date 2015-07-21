@@ -17,7 +17,8 @@ MAINTAINER Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # Install requeire packages fdr tuning primer
 RUN apt-get update && apt-get install -y \
         net-tools \
-        bc
+        bc \
+        less
 
 # Clean packages and histories
 RUN apt-get clean && rm -rf /var/lib/apt/lists/
