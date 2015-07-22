@@ -6,7 +6,7 @@
 # sure you have set the global system limit high enough! The high value
 # is required for a large number of opened tables
 # the default docker file limit is 1M
-# open-files-limit = 1048576
+# open_files_limit = 1048576
 
 #
 # * Fine Tuning
@@ -45,20 +45,24 @@ max_connections        = 200
 # Therefore you have to make sure to set the amount of open files
 # allowed to at least 4096 in the variable "open-files-limit" in
 # section [mysqld_safe]
-table_cache = 4096
+table_open_cache = 16384
 
 # The number of table definitions that can be stored in the definition cache.
 # If you use a large number of tables, you can create a large table definition
 # cache to speed up opening of tables. The table definition cache takes less
 # space and does not use file descriptors, unlike the normal table cache.
-table_definition_cache = 4096
+# The table definition cache takes less space and does not use file descriptors,
+# unlike the normal table cache. The minimum value is 400. The default value
+# is based on the following formula, capped to a limit of 2000:
+table_definition_cache = 8592
 
 # This permits the application to give the threads system a hint for the
 # desired number of threads that should be run at the same time.  This
 # value only makes sense on systems that support the thread_concurrency()
 # function call (Sun Solaris, for example).
 # You should try [number of CPUs]*(2..4) for thread_concurrency
-thread_concurrency = 16
+# DEPRECATED IN MySQL 5.6, removed from 5.7
+# thread_concurrency = 16
 
 # Maximum allowed size for a single HEAP (in memory) table. This option
 # is a protection against the accidential creation of a very large HEAP

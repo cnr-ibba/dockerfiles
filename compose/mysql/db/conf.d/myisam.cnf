@@ -12,6 +12,40 @@
 # used for internal temporary disk tables.
 key_buffer_size		= 256M
 
+# This value controls the demotion of buffers from the hot sublist of a key cache
+# to the warm sublist. Lower values cause demotion to happen more quickly.
+# The minimum value is 100. The default value is 300. See Section 8.10.2,
+# “The MyISAM Key Cache”, Midpoint insertion strategy in particoular
+#key_cache_age_threshold = 300
+
+# The size in bytes of blocks in the key cache. The default value is 1024. See
+# Section 8.10.2, “The MyISAM Key Cache”.
+#key_cache_block_size = 1024
+
+# By default, the key cache management system uses a simple LRU strategy for choosing key
+# cache blocks to be evicted, but it also supports a more sophisticated method called
+# the midpoint insertion strategy. When using the midpoint insertion strategy, the LRU chain
+# is divided into two parts: a hot sublist and a warm sublist. The division point between two
+# parts is not fixed, but the key cache management system takes care that the warm part
+# is not “too short,” always containing at least key_cache_division_limit percent of the key
+# cache blocks. key_cache_division_limit is a component of structured key cache variables,
+# so its value is a parameter that can be set per cache. When an index block is read from a
+# table into the key cache, it is placed at the end of the warm sublist. After a certain
+# number of hits (accesses of the block), it is promoted to the hot sublist. At present, the
+# number of hits required to promote a block (3) is the same for all index blocks. A block
+# promoted into the hot sublist is placed at the end of the list. The block then circulates
+# within this sublist. If the block stays at the beginning of the sublist for a long enough time,
+# it is demoted to the warm sublist. This time is determined by the value of the
+# key_cache_age_threshold component of the key cache. The midpoint insertion strategy
+# enables you to keep more-valued blocks always in the cache. If you prefer to use the plain
+# LRU strategy, leave the key_cache_division_limit value set to its default of 100.
+
+# The division point between the hot and warm sublists of the key cache buffer
+# list. The value is the percentage of the buffer list to use for the warm sublist.
+# Permissible values range from 1 to 100. The default value is 100. See Section
+# 8.10.2, “The MyISAM Key Cache”.
+key_cache_division_limit = 90
+
 # Size of the buffer used for doing full table scans of MyISAM tables.
 # Allocated per thread, if a full scan is needed.
 read_buffer_size = 4M

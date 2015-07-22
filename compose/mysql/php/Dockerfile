@@ -34,10 +34,10 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/
 
 # Install phpmyadmin
-ENV PHPMYADMIN_VERSION 4.4.10
+ENV PHPMYADMIN_VERSION 4.4.12
 
 # Downloading latest phpmyadmin distribution and extract archive, rename directory and remove tar file
-RUN curl -SL http://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/${PHPMYADMIN_VERSION}/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz -o /usr/src/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz \
+RUN curl -SL https://files.phpmyadmin.net/phpMyAdmin/${PHPMYADMIN_VERSION}/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz -o /usr/src/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz \
     && tar -xvzf /usr/src/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz -C /usr/src/ \
     && mv /usr/src/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages /usr/src/phpmyadmin \
     && rm /usr/src/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages.tar.gz \
