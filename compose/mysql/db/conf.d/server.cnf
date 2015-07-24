@@ -120,6 +120,17 @@ query_cache_min_res_unit = 4K
 # slowdown instead of a performance improvement.
 query_cache_size = 512M
 
+# Set the query cache type. Setting the GLOBAL value sets the type for all clients that
+# connect thereafter. Individual clients can set the SESSION value to affect their own use
+# of the query cache. Possible values are shown in the following table:
+# Option	Description
+# 0 or OFF	Do not cache results in or retrieve results from the query cache. Note that this does not
+#               deallocate the query cache buffer. To do that, you should set query_cache_size to 0.
+# 1 or ON	Cache all cacheable query results except for those that begin with SELECT SQL_NO_CACHE.
+# 2 or DEMAND	Cache results only for cacheable queries that begin with SELECT SQL_CACHE.
+# Cache all cacheable query results except for those that begin with SELECT SQL_NO_CACHE.
+query_cache_type = ON
+
 ###QUERY CACHE IS DISABLED
 ###THE QUERY CACHE IN MYSQL CLUSTER  CAN HAMPER PERFORMANCE A LOT. HENCE IT IS DISABLED
 ###BECAUSE INVALIDATION OF IT TAKES TIME (REMEMBER, IT IS A DISTRIBUTED ENVIRONMENT)
