@@ -1,13 +1,13 @@
 
 #
-# VERSION 0.1
+# VERSION 0.3
 # DOCKER-VERSION  1.5.0
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    A rocker container with some packages and users added
-# TO_BUILD:       docker build --rm -t bunop/rstudio .
-# CREATE_VOLUME:  docker create --name rstudio_volume bunop/rstudio /bin/true
-# TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ bunop/rstudio
-# TO_TAG:         docker tag bunop/rstudio:latest bunop/rstudio:0.2
+# TO_BUILD:       docker build --rm -t ptp/rstudio .
+# CREATE_VOLUME:  docker create --name rstudio_volume ptp/rstudio /bin/true
+# TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ ptp/rstudio
+# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.3
 #
 
 FROM rocker/rstudio
@@ -26,6 +26,24 @@ RUN rm -rf /var/lib/apt/lists/ && \
     libpq-dev \
     openssh-server \
     vim
+
+# Instructions to install java JDK under rstudio image: https://github.com/cardcorp/card-rocker/blob/master/r-java/Dockerfile
+RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" \
+      | tee /etc/apt/sources.list.d/webupd8team-java.list \
+    &&  echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" \
+      | tee -a /etc/apt/sources.list.d/webupd8team-java.list \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886 \
+    && echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" \
+        | /usr/bin/debconf-set-selections \
+    && apt-get update \
+    && apt-get install -y oracle-java8-installer \
+    && update-alternatives --display java \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    && R CMD javareconf
+
+# Runnig rstudio instance need to be restarted (rstudio-server restart). There are no problems when building
+# a new rstudio image
 
 # Clean packages and histories
 RUN apt-get clean && rm -rf /var/lib/apt/lists/
