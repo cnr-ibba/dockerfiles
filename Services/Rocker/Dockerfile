@@ -73,15 +73,21 @@ RUN addgroup --gid 521 biffanis && \
     adduser biffanis --uid 521 --gid 521 --disabled-password --gecos "Stefano Biffani" && \
     echo 'biffanis:biffanis' | chpasswd
 
-# Another user: see hos gid is different from uid
+# Another user: see that host gid is different from uid
 RUN addgroup --gid 1003 lazzarib && \
     adduser lazzarib --uid 513 --gid 1003 --disabled-password --gecos "Barbara Lazzari" && \
     echo 'lazzarib:lazzarib' | chpasswd
 
-# Another user: see hos gid is different from uid
+# Another user
 RUN addgroup --gid 527 fojadellii && \
     adduser fojadellii --uid 527 --gid 527 --disabled-password --gecos "Ilaria Fojadelli" && \
     echo 'fojadellii:fojadellii' | chpasswd
+
+# Another user
+RUN addgroup --gid 507 nicolazzie && \
+    adduser nicolazzie --uid 507 --gid 507 --disabled-password --gecos "Ezequiel Luis Nicolazzi" && \
+    echo 'nicolazzie:nicolazzie' | chpasswd
+
 
 # Add other users here...
 
