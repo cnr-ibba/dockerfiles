@@ -1,12 +1,12 @@
 
 #
-# VERSION 0.3
-# DOCKER-VERSION  1.5.0
-# AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
+# VERSION 0.4
+# DOCKER-VERSION  1.7.1
+# AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    A nginx container to work with phpmyadmin
-# TO_BUILD:       docker build --rm -t django_php .
-# TO_RUN:         docker run -d -P django_php
-# TO_TAG:         docker tag django_php:latest django_php:0.3
+# TO_BUILD:       docker build --rm -t wordpress_php .
+# TO_RUN:         docker run -d -P wordpress_php
+# TO_TAG:         docker tag wordpress_php:latest wordpress_php:0.4
 #
 
 # Starting from wordpress fpm (which derives from php:5.6.fpm)
@@ -42,6 +42,9 @@ RUN curl -SL https://files.phpmyadmin.net/phpMyAdmin/${PHPMYADMIN_VERSION}/phpMy
 
 # Override php-fpm default configuration
 COPY php-fpm.conf /usr/local/etc/
+
+# Add a new php configuration for additional parameters
+COPY php.ini /usr/local/etc/php/conf.d/
 
 # Set the phpMyAdmin config file in src directory
 COPY config.inc.php /usr/src/phpmyadmin/
