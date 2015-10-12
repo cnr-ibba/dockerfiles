@@ -23,7 +23,7 @@ When MySQL is started from a docker container, all data directories have to be c
 $ docker-compose run -d -e MYSQL_ROOT_PASSWORD=my-secret-pw db
 ```
 
-Once MySQL is istantiated for the first time or `mysql-data` directory is created or derived from another container, MySQL can be run with `docker-compose` standard commands. 
+Once MySQL is istantiated for the first time or `mysql-data` directory is created or derived from another container, MySQL can be run with `docker-compose` standard commands.
 
 The `$MYSQL_ENV_MYSQL_ROOT_PASSWORD` must be the same password chosen when database was created. Once MySQL data files are created (you can inspecy MySQL logs with `docker logs`), connect to MySQL database and create database and users needed from MySQL connections. The MySQL container defined in `docker-compose.yml`, never expose a port outside. You can get a mysql client to this container by linking a new  container, for instance:
 
@@ -62,7 +62,7 @@ Note as variables like `MYSQL_ROOT_PASSWORD="my-secret-pw"` are traslated with a
 With the docker run command, you can import a `<file>.sql' file by adding its path as a docker volume, for instance, if you are in `mysite_dump.sql` directory:
 
 ```sh
-$ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" < /data/mysite_dump.sql'
+$ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" mysite < /data/mysite_dump.sql'
 ```
 
 ### Removing stopped container
@@ -82,7 +82,7 @@ Django script will be served using the uwsgi server. You can get more informaton
 
 * [How to use Django with uWSGI](https://docs.djangoproject.com/en/1.8/howto/deployment/wsgi/uwsgi/)
 * [Django and NGINX](https://uwsgi.readthedocs.org/en/latest/tutorials/Django_and_nginx.html)
-* [uwsgi configuration](https://uwsgi.readthedocs.org/en/latest/Configuration.html) 
+* [uwsgi configuration](https://uwsgi.readthedocs.org/en/latest/Configuration.html)
 
 ### Fixing Dokerfile and uwsgi.ini files
 
@@ -211,7 +211,7 @@ RUN mkdir /var/www/html/mysite \
 
 In `Dockerfile` all modules required by php application need to be installed using the `docker-php-ext-install` provied inside the container. If the build fails, you need to install all the dependancies via `apt-get` as stated in [How to install more PHP extensions](https://github.com/docker-library/docs/tree/master/php#how-to-install-more-php-extensions)
 
-In the `config.inc.php` there are parameter configuration in order to work with phpmyadmin. You may want to change the name of `$cfg['Servers'][$i]['verbose']` variable, in order to set the name of your project database name. The default database used by phpmyadmin control user is `phpmyadmin`. You can change the control user credential, if you prefer. Next you have to add phpmyadmin control user to your database, grant him his privileges and create phpmyadmin database and tables. Build the php volume for phpmyadmin: 
+In the `config.inc.php` there are parameter configuration in order to work with phpmyadmin. You may want to change the name of `$cfg['Servers'][$i]['verbose']` variable, in order to set the name of your project database name. The default database used by phpmyadmin control user is `phpmyadmin`. You can change the control user credential, if you prefer. Next you have to add phpmyadmin control user to your database, grant him his privileges and create phpmyadmin database and tables. Build the php volume for phpmyadmin:
 
 ```sh
 $ docker-compose build php
@@ -221,7 +221,7 @@ You now have an image, like the others with <project_name> as a prefix. You can 
 
 ```sh
 $ docker create --name phpmyadmin_volume <project_name>_php /bin/true
-$ docker run -it --link <mysql_running_container>:mysql --volumes-from phpmyadmin_volume --rm mysql /bin/bash 
+$ docker run -it --link <mysql_running_container>:mysql --volumes-from phpmyadmin_volume --rm mysql /bin/bash
 
 # inside the running container. The $MYSQL_ROOT_PASSWORD is not set when using /bin/bash !!!
 
@@ -249,14 +249,14 @@ nginx/
 └── nginx.conf
 ```
 
-The `nginx.conf` contains general configuration for NGINX. If you need to run different processes or listen for a different number of connection, you may modify this file. The `mysite_nginx.conf` is the file which need to be modified accordingly to your project location. You can rename that file, but remember to fix the appropriate filename in `Dockerfile`. In this sample configuration, the served application is supposed to be under `mysite` location. Django static files are served via nginx by sharing volumes between django `web` container. Alos phpmyadmin `php` static files, like documentation, are served through docker volumes defined in `docker-compose.yml`. This container expose the standard 80 port outside. 
+The `nginx.conf` contains general configuration for NGINX. If you need to run different processes or listen for a different number of connection, you may modify this file. The `mysite_nginx.conf` is the file which need to be modified accordingly to your project location. You can rename that file, but remember to fix the appropriate filename in `Dockerfile`. In this sample configuration, the served application is supposed to be under `mysite` location. Django static files are served via nginx by sharing volumes between django `web` container. Alos phpmyadmin `php` static files, like documentation, are served through docker volumes defined in `docker-compose.yml`. This container expose the standard 80 port outside.
 
 ## Starting containers with docker compose
 
 The `nginx` container expose the default 80 port to the outside. You may modify the `docker-compose.yml` to expose the internal 80 to a HOST port. This will facilitate the access to the django service via proxi pass using the HOST webserver. An example of NGINX location for the HOST is placed in `host-mysite.conf`. Remember to fix location and port accordingly to your application. Now start database and django (in daemonized mode):
 
 ```sh
-$ docker-compose up -d 
+$ docker-compose up -d
 ```
 You can inspect docker logs with
 
