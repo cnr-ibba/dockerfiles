@@ -61,12 +61,20 @@ $ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_
 
 ## Serving docker containers in docker HOST
 
-You can serve docker compose using HOST NGINX, for instance, via proxy_pass. Place the followin code inside NGINX server environment. Remember to specify the port exported by your docker NGINX instance:
+You can serve docker compose using HOST NGINX, for instance, via proxy_pass. Place the following code inside NGINX server environment. Remember to specify the port exported by your docker NGINX instance:
 
 ```
-location /blog {
+location /blog/ {
+    # Add info to webpages
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Server $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_pass_header Set-Cookie;
+
     # Subitting a request to docker service
-    proxy_pass http://localhost:10080;
-    proxy_redirect http://localhost:10080/ $scheme://$http_host/;
+    proxy_pass http://localhost:10080/blog/;
+    proxy_redirect http://$host:10080/ $scheme://$http_host/;
 }
 ```
