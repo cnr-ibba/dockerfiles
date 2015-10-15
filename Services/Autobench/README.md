@@ -30,6 +30,6 @@ $ docker run -ti --name autobench --volume $PWD:/data ptp/autobench:latest /bin/
 Once inside the container, launch autobench with:
 
 ```bash
-$ autobench --single_host --host1 192.168.13.7 --uri1 /blog/index.php --quiet --low_rate 20
-    --high_rate 200 --rate_step 20 --num_call 10 --num_conn 5000 --timeout 5 --file /data/results-auto.tsv
+$ autobench --single_host --host1 192.168.13.7 --uri1 /blog/index.php --quiet --low_rate 20 \
+    --high_rate 200 --rate_step 20 --num_call 10 --num_conn 5000 --timeout 5 --file /data/results.tsv
 ```
