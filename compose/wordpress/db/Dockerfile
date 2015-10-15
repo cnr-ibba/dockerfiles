@@ -9,7 +9,7 @@
 # TO_TAG:         docker tag wordpress_db:latest wordpress_db:0.2
 #
 
-# Starting from wordpress fpm (which derives from php:5.6.fpm)
+# Starting from mysql base image
 FROM mysql:5.6
 
 MAINTAINER Paolo Cozzi <paolo.cozzi@tecnoparco.org>
