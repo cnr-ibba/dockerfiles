@@ -215,7 +215,7 @@ When number of request increases, nginx can't server all incoming messages, sinc
 
 ### NGINX-phpfpm with FastCGI Cache benchmark
 
-This is a benchmark obtained by this composed project *without* NGINX FastCGI cache and using 16 php-fpm worker (but load average is still < 1)
+This is a benchmark obtained by this composed project *with* NGINX FastCGI cache and using 16 php-fpm worker (but load average is still < 1)
 
 |dem_req_rate|req_rate|con_rate|min_rep_rate|avg_rep_rate|max_rep_rate|stddev_rep_rate|resp_time|net_io|errors|
 |----|----|----|----|----|----|----|----|----|----|

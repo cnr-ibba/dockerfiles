@@ -33,3 +33,9 @@ Once inside the container, launch autobench with:
 $ autobench --single_host --host1 192.168.13.7 --uri1 /blog/index.php --quiet --low_rate 20 \
     --high_rate 200 --rate_step 20 --num_call 10 --num_conn 5000 --timeout 5 --file /data/results.tsv
 ```
+
+You can also draw and image using gnuplot:
+
+```bash
+$ bench2graph  /data/results.tsv  /data/results.ps
+```

@@ -1,0 +1,6 @@
+
+#Ingoring results files
+*.ps
+*.tsv
+*.png
+
