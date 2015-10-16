@@ -25,8 +25,8 @@ RUN apt-get update && apt-get install -y \
  && apt-get install -y nginx-custom \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Add nginx user
-RUN useradd -s /bin/false nginx
+# Add nginx user (https://www.linode.com/docs/websites/nginx/how-to-install-nginx-on-debian-7-wheezy)
+RUN adduser --system --no-create-home --disabled-login --disabled-password --group nginx
  
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
