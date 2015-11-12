@@ -32,9 +32,6 @@ RUN adduser --system --no-create-home --disabled-login --disabled-password --gro
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
 RUN ln -sf /dev/stderr /var/log/nginx/error.log
 
-# nginx defaul tvolume
-VOLUME ["/var/cache/nginx"]
-
 # default ports
 EXPOSE 80 443
 
