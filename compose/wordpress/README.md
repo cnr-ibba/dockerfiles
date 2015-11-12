@@ -16,6 +16,28 @@ Before to start take a look in the `docker-compose.yml` file. This is the config
 
 Those name will be placed in each container in the `/etc/hosts` files, so you can ping `php` host inside `nginx` container, for instance, mo matter what ip addresses will be given to the container by docker. When starting a project for the first time, data directory and inital configuration have to be defined. Data directories will be placed inside this directory, in order to facilitate `docker-compose` commands once docker images where configured for the application. When data directories are created for the first time, the ownership of such directories is the same of the service running in the container. You can change it as you prefer, but remember that service run under a *non privileged* user, so you have to define **at least** the *read* privileged for files, and the *read-execute* privileges for directories.
 
+## Enabling permalink
+
+In order to enhable permalink, you have to seto properly the try_files directive in `nginx/conf.d/default.conf`
+
+```
+# the default location. Rewrite location to point a index file
+location / {
+    # try files or directory. If it doesn’t find a directory or a file,
+    # it performs an internal redirect to /index.php passing the query
+    # string arguments as parameters.
+    # http://www.lowendguide.com/3/webservers/wordpress-permalinks-with-nginx/
+    try_files $uri $uri/ /blog/index.php?$args;
+}
+
+```
+
+The last directive of try_files MUST prepend the wordpress installation directory (`blog` in such case or wharever you want) as described [here](http://www.lowendguide.com/3/webservers/wordpress-permalinks-with-nginx/). This directive can be modified even after containers were built, since this configuration file is provided by HOST as a volume. If you want to change this directive once containers are builded, simply restart NGINX container:
+
+```bash
+$ docker-compose restart nginx
+```
+
 ## Start a project for the first time
 
 Before building and instantiating containers, you need to modify the `MYSQL_ROOT_PASSWORD` and `PROJECT_NAME` variables according your needs. Then you can build and run containers by typing:
