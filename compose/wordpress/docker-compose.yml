@@ -14,16 +14,13 @@ db:
     - "./db/conf.d:/etc/mysql/conf.d"
 
   # for logging (only on docker 1.8 and higher):
-  log_driver: "json-file"
-  log_opt:
-    max-size: 1M
-    max-file: "10"
+  # log_driver: "json-file"
+  # log_opt:
+  #   max-size: 1M
+  #   max-file: "10"
 
 php:
   build: ./php
-  #default command in php container (see .php/Dockerfile)
-  volumes:
-    - "/etc/localtime:/etc/localtime:ro"
   expose:
     - "9000"
   #links container togheter
@@ -34,12 +31,14 @@ php:
   volumes:
     - "./php-data:/var/www/html"
     - "/etc/localtime:/etc/localtime:ro"
+    # exporting this directory, will enable purgin cache from wp-admin
+    - "/var/run/"
 
   # for logging (only on docker 1.8 and higher):
-  log_driver: "json-file"
-  log_opt:
-    max-size: 1M
-    max-file: "10"
+  # log_driver: "json-file"
+  # log_opt:
+  #   max-size: 1M
+  #   max-file: "10"
 
   environment:
     PROJECT_NAME: blog
@@ -59,7 +58,7 @@ nginx:
     - php
 
   # for logging (only on docker 1.8 and higher):
-  log_driver: "json-file"
-  log_opt:
-    max-size: 1M
-    max-file: "10"
+  # log_driver: "json-file"
+  # log_opt:
+  #   max-size: 1M
+  #   max-file: "10"
