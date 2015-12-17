@@ -22,3 +22,9 @@ Create a docker volume:
 Simply type:
 
       $ docker start atom
+
+## Check that modules works correctly
+
+ReStructured Text module need to be rebuild in this Atom distribution in order to
+work properly. Open the `Incompatible Packages` tab, and the rebuild rst-preview.
+You have to `Reload Atom` in order to activate the rebuilded module.

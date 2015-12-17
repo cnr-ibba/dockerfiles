@@ -1,12 +1,12 @@
 
 #
-# VERSION 0.2
+# VERSION 0.3
 # DOCKER-VERSION  1.7.1
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    An atom container to work with atom
 # TO_BUILD:       docker build --rm -t atom .
 # TO_RUN:         docker run -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY atom
-# TO_TAG:         docker tag atom:latest atom:0.2
+# TO_TAG:         docker tag atom:latest atom:0.3
 #
 
 # I think is better to download a buildeb package insted of compile atom from source
@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgtk2.0-0 \
     libnss3 \
     libxtst6 \
+    pandoc \
  && apt-get clean
 
 # Download the last stable atom deb package
@@ -55,9 +56,9 @@ USER developer
 ENV HOME /home/developer
 WORKDIR $HOME
 
-# get andmos configfiles from github (the original author of this Dockerfile)
+# get my configfiles from github
 RUN mkdir .atom &&  \
-    git clone https://github.com/andmos/dotfiles.git && \
+    git clone https://github.com/bunop/dotfiles.git && \
     cd dotfiles/atom; ./configureAtom
 
 CMD ["/usr/bin/atom", "--foreground"]
