@@ -42,24 +42,62 @@ Email Address []:
 ```
 
 Then you have to instruct every docker daemon to trust that certificate. This is
-done by copying the domain.crt file to `/etc/docker/certs.d/<common_name>:5000/ca.crt`.
+done by copying the domain.crt file to `/etc/docker/certs.d/cloud1.bioinformatics.tecnoparco.org:5000/ca.crt`.
 
-When using authentication, some versions of docker also require you to trust the certificate at the OS level, Usually, on Ubuntu this is done with:
+When using authentication, some versions of docker also require you to trust the
+certificate at the OS level, Usually, on Ubuntu this is done with:
 
 ```bash
-$ cp auth/domain.crt /usr/local/share/ca-certificates/myregistrydomain.com.crt
+$ cp auth/domain.crt /usr/local/share/ca-certificates/cloud1.bioinformatics.tecnoparco.org.crt
 $ update-ca-certificates
 ```
 
 and on RedHat with:
 
 ```bash
-$ cp auth/domain.crt /etc/pki/ca-trust/source/anchors/myregistrydomain.com.crt
+$ cp auth/domain.crt /etc/pki/ca-trust/source/anchors/cloud1.bioinformatics.tecnoparco.org.crt
 $ update-ca-trust
 ```
 
 Remeber to restart docker service, in order that registry works correctly. More information
 could be found [here][docker-insecure]
+
+Restricting access
+------------------
+
+Except for registries running on secure local networks, registries should always
+implement access restrictions. The simplest way to achieve access restriction is
+through basic authentication (this is very similar to other web servers’ basic
+authentication mechanism):
+
+*Warning: You cannot use authentication with an insecure registry. You have to configure TLS first for this to work.*
+
+First create a password file with one entry for the user `testuser`, with password
+`testpassword`:
+
+```bash
+$ mkdir auth
+$ docker run --entrypoint htpasswd registry:2 -Bbn testuser testpassword > auth/htpasswd
+```
+
+Make sure you stopped your registry from the previous step, then start it again.
+You should now be able to:
+
+```bash
+$ docker login cloud1.bioinformatics.tecnoparco.org:5000
+```
+
+And then push and pull images as an authenticated user. More information could be
+found [here][docker-basic-auth]
+
+Starting Docker Registry
+------------------------
+
+You can then start your registry with a simple
+
+```bash
+$ docker-compose up -d
+```
 
 Testing Docker Registry
 -----------------------
@@ -73,34 +111,23 @@ $ docker pull ubuntu
 Tag the image so that it points to your registry
 
 ```bash
-$ docker tag ubuntu localhost:5000/myfirstimage
+$ docker tag ubuntu cloud1.bioinformatics.tecnoparco.org:5000/myfirstimage
 ```
 
 Push it:
 
 ```bash
-$ docker push localhost:5000/myfirstimage
+$ docker push cloud1.bioinformatics.tecnoparco.org:5000/myfirstimage
 ```
 
 Pull it back
 
 ```bash
-$ docker pull localhost:5000/myfirstimage
+$ docker pull cloud1.bioinformatics.tecnoparco.org:5000/myfirstimage
 ```
-
-
-Todo
-----
-
-rimuovi /home/paolo/.docker/config.json
-
-togliere certificati
-
-cp auth/domain.crt /usr/local/share/ca-certificates/myregistrydomain.com.crt
-update-ca-certificates
-
 
 <!-- References -->
 
 [docker-registry]: https://docs.docker.com/registry/
 [docker-insecure]: https://docs.docker.com/registry/insecure/
+[docker-basic-auth]: https://docs.docker.com/registry/deploying/#native-basic-auth
