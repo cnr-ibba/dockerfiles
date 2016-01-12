@@ -14,3 +14,9 @@ registry:
     - ./data:/var/lib/registry
     - ./certs:/certs
     - ./auth:/auth
+    - ./conf/config.yml:/etc/docker/registry/config.yml
+  links:
+    - cache
+
+cache:
+  image: redis:3

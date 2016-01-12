@@ -4,13 +4,31 @@ log:
     service: registry
 storage:
     cache:
-        blobdescriptor: inmemory
+        blobdescriptor: redis
     filesystem:
         rootdirectory: /var/lib/registry
+    maintenance:
+      uploadpurging:
+        enabled: true
+        age: 168h
+        interval: 24h
+        dryrun: false
 http:
     addr: :5000
+    secret: supersecretuuid
     headers:
         X-Content-Type-Options: [nosniff]
+redis:
+  addr: cache:6379
+  db: 0
+  dialtimeout: 10ms
+  readtimeout: 10ms
+  writetimeout: 10ms
+  pool:
+    maxidle: 16
+    maxactive: 64
+    idletimeout: 300s
+
 health:
   storagedriver:
     enabled: true
