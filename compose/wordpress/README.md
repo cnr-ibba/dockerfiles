@@ -65,7 +65,7 @@ With the docker run command, you can do a `mysite` database dump:
 
 ```bash
 $ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" \
-    --rm mysql sh -c 'exec mysqldump -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" \
+    --rm mysql:5.6 sh -c 'exec mysqldump -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" \
     -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" wordpress > /data/wordpress_dump.sql'
 ```
 
@@ -77,7 +77,7 @@ With the docker run command, you can import a `<file>.sql' file by adding its pa
 
 ```bash
 $ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" \
-    --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" \
+    --rm mysql:5.6 sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" \
     -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" wordpress < /data/wordpress_dump.sql'
 ```
 

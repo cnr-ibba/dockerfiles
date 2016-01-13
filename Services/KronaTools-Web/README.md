@@ -43,6 +43,7 @@ Now you have to reload service and start Krona Tools service:
 
 ```sh
 $ systemctl daemon-reload
+$ systemctl enable web_krona_tools
 $ systemctl start web_krona_tools
 $ systemctl status web_krona_tools
 ```

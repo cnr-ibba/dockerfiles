@@ -113,6 +113,7 @@ Now you have to reload all configuration for systemd, and start the service in o
 
 ```sh
 $ systemctl daemon-reload
+$ systemctl enable rstudio_server
 $ systemctl start rstudio_server
 $ systemctl status rstudio_server
 
