@@ -20,3 +20,4 @@ registry:
 
 cache:
   image: redis:3
+  restart: always

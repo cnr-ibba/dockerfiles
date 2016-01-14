@@ -13,11 +13,22 @@ storage:
         age: 168h
         interval: 24h
         dryrun: false
+
 http:
-    addr: :5000
-    secret: supersecretuuid
-    headers:
-        X-Content-Type-Options: [nosniff]
+  addr: :5000
+  net: tcp
+  secret: supersecretuuid
+  tls:
+    certificate: /certs/domain.crt
+    key: /certs/domain.key
+    # clientcas:
+    #   - /path/to/ca.pem
+    #   - /path/to/another/ca.pem
+  debug:
+    addr: localhost:5001
+  headers:
+    X-Content-Type-Options: [nosniff]
+
 redis:
   addr: cache:6379
   db: 0
@@ -34,3 +45,8 @@ health:
     enabled: true
     interval: 10s
     threshold: 3
+
+auth:
+  htpasswd:
+    realm: basic-realm
+    path: /auth/htpasswd
