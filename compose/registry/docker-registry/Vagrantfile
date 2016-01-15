@@ -1,0 +1,39 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+
+INSTANCE_NAME_PREFIX = "reg"
+VB_NUM_CPU = 2
+VB_NUM_MEM = 2048
+BOX = "centos/7"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  (1..2).each do |n|
+    vmName = "%s-%02d" % [INSTANCE_NAME_PREFIX, n]
+    config.vm.define "#{vmName}" do |machine|
+      machine.vm.box = "#{BOX}"
+      machine.vm.box_check_update = false
+
+      address = "192.168.122.#{n+10}"
+      #machine.vm.network "public_network", ip: address
+      machine.vm.hostname = "#{vmName}"
+ 
+      # Public Network
+      machine.vm.network "public_network", ip: address,
+        :dev => "virbr0",
+        :mode => "bridge",
+        :type => "bridge"
+
+      config.vm.synced_folder ".", "/vagrant", disabled: true
+      #machine.vm.synced_folder "/Users", "/Users"
+      machine.ssh.insert_key = false
+
+      machine.vm.provider "libvirt" do |vb|
+        vb.cpus = VB_NUM_CPU
+        vb.memory = VB_NUM_MEM
+      end
+    end
+  end
+end

@@ -1,4 +1,5 @@
-# Ingnore directories
+# Ignore directories
 certs/
 data/
 auth/
+docker-registry/.vagrant/
