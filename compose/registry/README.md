@@ -98,7 +98,7 @@ First create a password file with one entry for the user `testuser`, with passwo
 
 ```
 $ mkdir auth
-$ docker run --entrypoint htpasswd registry:2 -Bbn testuser testpassword > auth/htpasswd
+$ docker run --entrypoint htpasswd httpd:2.4 -bn testuser testpassword > auth/nginx.htpasswd
 ```
 
 Now you can start docker registry server. Using docker-compose you can do:
@@ -135,64 +135,97 @@ required if certificate is untrusted at OS level):
 
 ```
 $ curl -v -k https://registry.ptp:5000/v2/_catalog
-* About to connect() to registry.ptp port 5000 (#0)
-*   Trying 192.168.13.7...
-* Connected to registry.ptp (192.168.13.7) port 5000 (#0)
-* Initializing NSS with certpath: sql:/etc/pki/nssdb
-* skipping SSL peer certificate verification
-* SSL connection using TLS_RSA_WITH_AES_128_CBC_SHA
+* Hostname was NOT found in DNS cache
+*   Trying 127.0.0.1...
+* Connected to registry.ptp (127.0.0.1) port 5000 (#0)
+* successfully set certificate verify locations:
+*   CAfile: none
+  CApath: /etc/ssl/certs
+* SSLv3, TLS handshake, Client hello (1):
+* SSLv3, TLS handshake, Server hello (2):
+* SSLv3, TLS handshake, CERT (11):
+* SSLv3, TLS handshake, Server key exchange (12):
+* SSLv3, TLS handshake, Server finished (14):
+* SSLv3, TLS handshake, Client key exchange (16):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES256-GCM-SHA384
 * Server certificate:
-*       subject: E=bioinfo.notifications@tecnoparco.org,CN=registry.ptp,OU=bioinformatica,O=PTP,L=Lodi,ST=Lodi,C=IT
-*       start date: gen 15 09:40:46 2016 GMT
-*       expire date: gen 13 09:40:46 2021 GMT
-*       common name: registry.ptp
-*       issuer: E=bioinfo.notifications@tecnoparco.org,CN=registry.ptp,OU=bioinformatica,O=PTP,L=Lodi,ST=Lodi,C=IT
+*        subject: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
+*        start date: 2016-01-15 09:40:46 GMT
+*        expire date: 2021-01-13 09:40:46 GMT
+*        issuer: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
+*        SSL certificate verify ok.
 > GET /v2/_catalog HTTP/1.1
-> User-Agent: curl/7.29.0
+> User-Agent: curl/7.38.0
 > Host: registry.ptp:5000
 > Accept: */*
 >
 < HTTP/1.1 401 Unauthorized
-< Content-Type: application/json; charset=utf-8
+* Server nginx/1.9.9 is not blacklisted
+< Server: nginx/1.9.9
+< Date: Fri, 15 Jan 2016 15:27:28 GMT
+< Content-Type: text/html
+< Content-Length: 194
+< Connection: keep-alive
+< WWW-Authenticate: Basic realm="Registry realm"
 < Docker-Distribution-Api-Version: registry/2.0
-< Www-Authenticate: Basic realm="Registry Realm"
-< X-Content-Type-Options: nosniff
-< Date: Fri, 15 Jan 2016 10:34:13 GMT
-< Content-Length: 134
 <
-{"errors":[{"code":"UNAUTHORIZED","message":"authentication required","detail":[{"Type":"registry","Name":"catalog","Action":"*"}]}]}
+<html>
+<head><title>401 Authorization Required</title></head>
+<body bgcolor="white">
+<center><h1>401 Authorization Required</h1></center>
+<hr><center>nginx/1.9.9</center>
+</body>
+</html>
 * Connection #0 to host registry.ptp left intact
 ```
 
-Then test using `user:password` credential:
+Then test using `testuser:testpassword` credential:
 
 ```
 $ curl -v -k https://testuser:testpassword@registry.ptp:5000/v2/_catalog
-* About to connect() to registry.ptp port 5000 (#0)
-*   Trying 192.168.13.7...
-* Connected to registry.ptp (192.168.13.7) port 5000 (#0)
-* Initializing NSS with certpath: sql:/etc/pki/nssdb
-* skipping SSL peer certificate verification
-* SSL connection using TLS_RSA_WITH_AES_128_CBC_SHA
+* Hostname was NOT found in DNS cache
+*   Trying 127.0.0.1...
+* Connected to registry.ptp (127.0.0.1) port 5000 (#0)
+* successfully set certificate verify locations:
+*   CAfile: none
+  CApath: /etc/ssl/certs
+* SSLv3, TLS handshake, Client hello (1):
+* SSLv3, TLS handshake, Server hello (2):
+* SSLv3, TLS handshake, CERT (11):
+* SSLv3, TLS handshake, Server key exchange (12):
+* SSLv3, TLS handshake, Server finished (14):
+* SSLv3, TLS handshake, Client key exchange (16):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES256-GCM-SHA384
 * Server certificate:
-*       subject: E=bioinfo.notifications@tecnoparco.org,CN=registry.ptp,OU=bioinformatica,O=PTP,L=Lodi,ST=Lodi,C=IT
-*       start date: gen 15 09:40:46 2016 GMT
-*       expire date: gen 13 09:40:46 2021 GMT
-*       common name: registry.ptp
-*       issuer: E=bioinfo.notifications@tecnoparco.org,CN=registry.ptp,OU=bioinformatica,O=PTP,L=Lodi,ST=Lodi,C=IT
+*        subject: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
+*        start date: 2016-01-15 09:40:46 GMT
+*        expire date: 2021-01-13 09:40:46 GMT
+*        issuer: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
+*        SSL certificate verify ok.
 * Server auth using Basic with user 'testuser'
 > GET /v2/_catalog HTTP/1.1
 > Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3N3b3Jk
-> User-Agent: curl/7.29.0
+> User-Agent: curl/7.38.0
 > Host: registry.ptp:5000
 > Accept: */*
 >
 < HTTP/1.1 200 OK
+* Server nginx/1.9.9 is not blacklisted
+< Server: nginx/1.9.9
+< Date: Fri, 15 Jan 2016 15:27:52 GMT
 < Content-Type: application/json; charset=utf-8
+< Content-Length: 34
+< Connection: keep-alive
 < Docker-Distribution-Api-Version: registry/2.0
 < X-Content-Type-Options: nosniff
-< Date: Fri, 15 Jan 2016 10:34:55 GMT
-< Content-Length: 34
 <
 {"repositories":["myfirstimage"]}
 * Connection #0 to host registry.ptp left intact

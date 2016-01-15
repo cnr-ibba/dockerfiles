@@ -18,12 +18,12 @@ http:
   addr: :5000
   net: tcp
   secret: supersecretuuid
-  tls:
-    certificate: /certs/domain.crt
-    key: /certs/domain.key
-    # clientcas:
-    #   - /path/to/ca.pem
-    #   - /path/to/another/ca.pem
+  # tls:
+  #   certificate: /certs/domain.crt
+  #   key: /certs/domain.key
+  #   # clientcas:
+  #   #   - /path/to/ca.pem
+  #   #   - /path/to/another/ca.pem
   debug:
     addr: localhost:5001
   headers:
@@ -46,7 +46,7 @@ health:
     interval: 10s
     threshold: 3
 
-auth:
-  htpasswd:
-    realm: basic-realm
-    path: /auth/htpasswd
+# auth:
+#   htpasswd:
+#     realm: basic-realm
+#     path: /auth/htpasswd
