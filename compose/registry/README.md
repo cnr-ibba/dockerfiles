@@ -11,6 +11,7 @@ stores and lets you distribute Docker images. You should use the Registry if you
 
 More information could be found [here][docker-registry]. A nice example on deploying
 a private docker registry server/client could be found [here][private-docker-registry].
+Others info on private docker configuration could be found [here][private-docker-registry-configuration].
 
 Using self-signed certificates
 ------------------------------
@@ -79,7 +80,7 @@ $ cp certs/domain.crt /etc/pki/ca-trust/source/anchors/registry.ptp.crt
 $ update-ca-trust
 ```
 
-Remeber to restart docker service, in order that registry works correctly. More information
+Remember to restart docker service, in order that registry works correctly. More information
 could be found [here][docker-insecure]. The same certificate MUST be copied in all
 docker host in which registry needs to be reached.
 
@@ -114,7 +115,8 @@ $ docker login registry.ptp:5000
 ```
 
 And then push and pull images as an authenticated user. More information could be
-found [here][docker-basic-auth]
+found [here][docker-basic-auth]. For information on authentication using NGINX, see
+[here][docker-nginx-authentication].
 
 Starting Docker Registry
 ------------------------
@@ -231,7 +233,71 @@ $ curl -v -k https://testuser:testpassword@registry.ptp:5000/v2/_catalog
 * Connection #0 to host registry.ptp left intact
 ```
 
-### Download an image
+### Serving registry using System NGINX
+
+By default, NGINX can load config files in two ways:
+
+```
+    # Load modular configuration files from the /etc/nginx/conf.d directory.
+    # See http://nginx.org/en/docs/ngx_core_module.html#include
+    # for more information.
+    include /etc/nginx/conf.d/*.conf;
+
+    server {
+        listen       80 default_server;
+        listen       [::]:80 default_server;
+        server_name  _;
+        root         /usr/share/nginx/html;
+
+        # Load configuration files for the default server block.
+        include /etc/nginx/default.d/*.conf;
+
+```
+
+The first include (`/etc/nginx/conf.d/`) it's outside the main server directive, while
+the second include (`/etc/nginx/default.d/`) it's inside the sever directory. So,
+the configuration loaded may be general or can declare another server directory in
+`/etc/nginx/conf.d/`, while in `/etc/nginx/default.d/` we can declare directive internal
+to server, like location. We can define a new server directive, which listen from
+port 443 and serve docker registry as a proxy. Simple include those line in `/etc/nginx/conf.d/registry.ptp.conf`:
+
+```
+server {
+  listen 443;
+  server_name registry.ptp;
+  ssl on;
+  ssl_certificate /etc/nginx/conf.d/registry.ptp/domain.crt;
+  ssl_certificate_key /etc/nginx/conf.d/registry.ptp/domain.key;
+
+  location / {
+    # Add info to webpages
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Server $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_pass_header Set-Cookie;
+
+    # Subitting a request to docker service
+    proxy_pass https://registry.ptp:5000;
+    proxy_redirect http://$host:5000/ $scheme://$http_host/;
+  }
+}
+```
+
+Since we have `registry.ptp` in `/etc/hosts`, we can login to docker registry server
+whitout specifing a port number, eg:
+
+```
+$ docker login registry.ptp                                                                                                       
+Username (testuser):
+WARNING: login credentials saved in /home/paolo/.docker/config.json
+Login Succeeded
+```
+
+Useful links could be found [here][supervisor-and-nginx] and [here][nginx-proxy-examples].
+
+### Download an image (using NGINX as proxy for docker-registry)
 
 Pull (or build) some image from the hub
 
@@ -242,19 +308,19 @@ $ docker pull ubuntu
 Tag the image so that it points to your registry
 
 ```
-$ docker tag ubuntu registry.ptp:5000/myfirstimage
+$ docker tag ubuntu registry.ptp/myfirstimage
 ```
 
 Push it:
 
 ```
-$ docker push registry.ptp:5000/myfirstimage
+$ docker push registry.ptp/myfirstimage
 ```
 
 Pull it back
 
 ```
-$ docker pull registry.ptp:5000/myfirstimage
+$ docker pull registry.ptp/myfirstimage
 ```
 
 <!-- References -->
@@ -263,3 +329,9 @@ $ docker pull registry.ptp:5000/myfirstimage
 [docker-insecure]: https://docs.docker.com/registry/insecure/
 [docker-basic-auth]: https://docs.docker.com/registry/deploying/#native-basic-auth
 [private-docker-registry]: http://blog.agilepartner.net/private-docker-registry/
+[docker-nginx-authentication]: https://docs.docker.com/registry/nginx/
+[private-docker-registry-configuration]: http://blog.agilepartner.net/private-docker-registry-configuration/
+[supervisor-and-nginx]: https://www.kf-interactive.com/blog/roll-your-own-docker-registry-with-docker-compose-supervisor-and-nginx/
+[nginx-proxy-examples]: https://github.com/kwk/docker-registry-frontend/wiki/nginx-proxy-examples
+
+<!-- Not used: http://blog.agilepartner.net/private-docker-registry-behind-an-httpd-reverse-proxy/ -->
