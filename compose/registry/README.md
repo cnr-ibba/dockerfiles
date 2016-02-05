@@ -127,113 +127,8 @@ You can then start your registry with a simple
 $ docker-compose up -d
 ```
 
-Testing Docker Registry
------------------------
-
-### Test authentication
-
-Testing login credential using `curl`. Test without authentication (the -k option is
-required if certificate is untrusted at OS level):
-
-```
-$ curl -v -k https://registry.ptp:5000/v2/_catalog
-* Hostname was NOT found in DNS cache
-*   Trying 127.0.0.1...
-* Connected to registry.ptp (127.0.0.1) port 5000 (#0)
-* successfully set certificate verify locations:
-*   CAfile: none
-  CApath: /etc/ssl/certs
-* SSLv3, TLS handshake, Client hello (1):
-* SSLv3, TLS handshake, Server hello (2):
-* SSLv3, TLS handshake, CERT (11):
-* SSLv3, TLS handshake, Server key exchange (12):
-* SSLv3, TLS handshake, Server finished (14):
-* SSLv3, TLS handshake, Client key exchange (16):
-* SSLv3, TLS change cipher, Client hello (1):
-* SSLv3, TLS handshake, Finished (20):
-* SSLv3, TLS change cipher, Client hello (1):
-* SSLv3, TLS handshake, Finished (20):
-* SSL connection using TLSv1.2 / ECDHE-RSA-AES256-GCM-SHA384
-* Server certificate:
-*        subject: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
-*        start date: 2016-01-15 09:40:46 GMT
-*        expire date: 2021-01-13 09:40:46 GMT
-*        issuer: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
-*        SSL certificate verify ok.
-> GET /v2/_catalog HTTP/1.1
-> User-Agent: curl/7.38.0
-> Host: registry.ptp:5000
-> Accept: */*
->
-< HTTP/1.1 401 Unauthorized
-* Server nginx/1.9.9 is not blacklisted
-< Server: nginx/1.9.9
-< Date: Fri, 15 Jan 2016 15:27:28 GMT
-< Content-Type: text/html
-< Content-Length: 194
-< Connection: keep-alive
-< WWW-Authenticate: Basic realm="Registry realm"
-< Docker-Distribution-Api-Version: registry/2.0
-<
-<html>
-<head><title>401 Authorization Required</title></head>
-<body bgcolor="white">
-<center><h1>401 Authorization Required</h1></center>
-<hr><center>nginx/1.9.9</center>
-</body>
-</html>
-* Connection #0 to host registry.ptp left intact
-```
-
-Then test using `testuser:testpassword` credential:
-
-```
-$ curl -v -k https://testuser:testpassword@registry.ptp:5000/v2/_catalog
-* Hostname was NOT found in DNS cache
-*   Trying 127.0.0.1...
-* Connected to registry.ptp (127.0.0.1) port 5000 (#0)
-* successfully set certificate verify locations:
-*   CAfile: none
-  CApath: /etc/ssl/certs
-* SSLv3, TLS handshake, Client hello (1):
-* SSLv3, TLS handshake, Server hello (2):
-* SSLv3, TLS handshake, CERT (11):
-* SSLv3, TLS handshake, Server key exchange (12):
-* SSLv3, TLS handshake, Server finished (14):
-* SSLv3, TLS handshake, Client key exchange (16):
-* SSLv3, TLS change cipher, Client hello (1):
-* SSLv3, TLS handshake, Finished (20):
-* SSLv3, TLS change cipher, Client hello (1):
-* SSLv3, TLS handshake, Finished (20):
-* SSL connection using TLSv1.2 / ECDHE-RSA-AES256-GCM-SHA384
-* Server certificate:
-*        subject: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
-*        start date: 2016-01-15 09:40:46 GMT
-*        expire date: 2021-01-13 09:40:46 GMT
-*        issuer: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
-*        SSL certificate verify ok.
-* Server auth using Basic with user 'testuser'
-> GET /v2/_catalog HTTP/1.1
-> Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3N3b3Jk
-> User-Agent: curl/7.38.0
-> Host: registry.ptp:5000
-> Accept: */*
->
-< HTTP/1.1 200 OK
-* Server nginx/1.9.9 is not blacklisted
-< Server: nginx/1.9.9
-< Date: Fri, 15 Jan 2016 15:27:52 GMT
-< Content-Type: application/json; charset=utf-8
-< Content-Length: 34
-< Connection: keep-alive
-< Docker-Distribution-Api-Version: registry/2.0
-< X-Content-Type-Options: nosniff
-<
-{"repositories":["myfirstimage"]}
-* Connection #0 to host registry.ptp left intact
-```
-
-### Serving registry using System NGINX
+Serving registry using System NGINX
+-----------------------------------
 
 By default, NGINX can load config files in two ways:
 
@@ -270,17 +165,24 @@ server {
   ssl_certificate_key /etc/nginx/conf.d/registry.ptp/domain.key;
 
   location / {
+    # disable any limits to avoid HTTP 413 for large image uploads
+    client_max_body_size 0;
+
+    # required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)
+    chunked_transfer_encoding on;
+
     # Add info to webpages
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-Host $host;
     proxy_set_header X-Forwarded-Server $host;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
     proxy_pass_header Set-Cookie;
 
     # Subitting a request to docker service
     proxy_pass https://registry.ptp:5000;
-    proxy_redirect http://$host:5000/ $scheme://$http_host/;
+    proxy_redirect $scheme://$host:5000/ $scheme://$http_host/;
   }
 }
 ```
@@ -297,7 +199,113 @@ Login Succeeded
 
 Useful links could be found [here][supervisor-and-nginx] and [here][nginx-proxy-examples].
 
-### Download an image (using NGINX as proxy for docker-registry)
+Testing Docker Registry
+-----------------------
+
+### Test authentication
+
+Testing login credential using `curl`. Test without authentication (the -k option is
+required if certificate is untrusted at OS level):
+
+```
+$ curl -v -k https://registry.ptp/v2/_catalog
+* Hostname was NOT found in DNS cache
+*   Trying 127.0.0.1...
+* Connected to registry.ptp (127.0.0.1) port 5000 (#0)
+* successfully set certificate verify locations:
+*   CAfile: none
+  CApath: /etc/ssl/certs
+* SSLv3, TLS handshake, Client hello (1):
+* SSLv3, TLS handshake, Server hello (2):
+* SSLv3, TLS handshake, CERT (11):
+* SSLv3, TLS handshake, Server key exchange (12):
+* SSLv3, TLS handshake, Server finished (14):
+* SSLv3, TLS handshake, Client key exchange (16):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES256-GCM-SHA384
+* Server certificate:
+*        subject: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
+*        start date: 2016-01-15 09:40:46 GMT
+*        expire date: 2021-01-13 09:40:46 GMT
+*        issuer: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
+*        SSL certificate verify ok.
+> GET /v2/_catalog HTTP/1.1
+> User-Agent: curl/7.38.0
+> Host: registry.ptp
+> Accept: */*
+>
+< HTTP/1.1 401 Unauthorized
+* Server nginx/1.9.9 is not blacklisted
+< Server: nginx/1.9.9
+< Date: Fri, 15 Jan 2016 15:27:28 GMT
+< Content-Type: text/html
+< Content-Length: 194
+< Connection: keep-alive
+< WWW-Authenticate: Basic realm="Registry realm"
+< Docker-Distribution-Api-Version: registry/2.0
+<
+<html>
+<head><title>401 Authorization Required</title></head>
+<body bgcolor="white">
+<center><h1>401 Authorization Required</h1></center>
+<hr><center>nginx/1.9.9</center>
+</body>
+</html>
+* Connection #0 to host registry.ptp left intact
+```
+
+Then test using `testuser:testpassword` credential:
+
+```
+$ curl -v -k https://testuser:testpassword@registry.ptp/v2/_catalog
+* Hostname was NOT found in DNS cache
+*   Trying 127.0.0.1...
+* Connected to registry.ptp (127.0.0.1) port 5000 (#0)
+* successfully set certificate verify locations:
+*   CAfile: none
+  CApath: /etc/ssl/certs
+* SSLv3, TLS handshake, Client hello (1):
+* SSLv3, TLS handshake, Server hello (2):
+* SSLv3, TLS handshake, CERT (11):
+* SSLv3, TLS handshake, Server key exchange (12):
+* SSLv3, TLS handshake, Server finished (14):
+* SSLv3, TLS handshake, Client key exchange (16):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES256-GCM-SHA384
+* Server certificate:
+*        subject: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
+*        start date: 2016-01-15 09:40:46 GMT
+*        expire date: 2021-01-13 09:40:46 GMT
+*        issuer: C=IT; ST=Lodi; L=Lodi; O=PTP; OU=bioinformatica; CN=registry.ptp; emailAddress=bioinfo.notifications@tecnoparco.org
+*        SSL certificate verify ok.
+* Server auth using Basic with user 'testuser'
+> GET /v2/_catalog HTTP/1.1
+> Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3N3b3Jk
+> User-Agent: curl/7.38.0
+> Host: registry.ptp
+> Accept: */*
+>
+< HTTP/1.1 200 OK
+* Server nginx/1.9.9 is not blacklisted
+< Server: nginx/1.9.9
+< Date: Fri, 15 Jan 2016 15:27:52 GMT
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 34
+< Connection: keep-alive
+< Docker-Distribution-Api-Version: registry/2.0
+< X-Content-Type-Options: nosniff
+<
+{"repositories":["myfirstimage"]}
+* Connection #0 to host registry.ptp left intact
+```
+
+### Download and pull an image (using NGINX as proxy for docker-registry)
 
 Pull (or build) some image from the hub
 
