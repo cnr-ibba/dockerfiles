@@ -14,6 +14,11 @@ FROM rocker/shiny
 # The mainteiner of this image
 MAINTAINER Paolo Cozzi <paolo.cozzi@ptp.it>
 
+# install package dependencies
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    libxml2-dev
+
 # Install R packages. Packages are listed in packages.txt
 COPY install.r packages.txt /root/
 RUN Rscript --slave --vanilla /root/install.r
