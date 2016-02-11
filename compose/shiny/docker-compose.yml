@@ -6,7 +6,7 @@ shiny:
   # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
   volumes:
     - "./shiny-apps:/srv/shiny-server/"
-    - "./conf/shiny-server.conf:/etc/shiny-server/shiny-server.conf"
+    - "./shiny/shiny-server.conf:/etc/shiny-server/shiny-server.conf"
 
   # expose the shiny server ports
   expose:
@@ -22,7 +22,7 @@ nginx:
   links:
     - shiny:shiny
   volumes:
-    - ./conf/nginx-default.conf:/etc/nginx/conf.d/default.conf
+    - ./nginx-conf.d/:/etc/nginx/conf.d/
 
   # auto restart container
   restart: always
