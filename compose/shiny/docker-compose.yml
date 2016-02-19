@@ -18,7 +18,7 @@ shiny:
 nginx:
   image: "nginx:1.9"
   ports:
-    - "80:80"
+    - "10080:80"
   links:
     - shiny:shiny
   volumes:

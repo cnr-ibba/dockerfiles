@@ -1,10 +1,13 @@
 
 # Developing a Shiny Serve with docker
 
+## authentication using NGINX
+
 Create a per site [authentication][authentication-nginx] using `openssl passwd`.
 Create a file per project (an user can't authenticate to all sites)
 
 ```
+$ cd nginx-conf.d/
 $ echo -n 'shiny:' >> .htpasswd-BoxOfficeMojo
 $ openssl passwd -apr1 >> .htpasswd-BoxOfficeMojo
 ```
@@ -43,3 +46,8 @@ location /shiny/RShiny-BoxOfficeMojo/ {
 [rstudio-proxy]: https://support.rstudio.com/hc/en-us/articles/200552326-Running-RStudio-Server-with-a-Proxy
 [shiny-proxy]: https://support.rstudio.com/hc/en-us/articles/213733868-Running-Shiny-Server-with-a-Proxy
 [authentication-nginx]: https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authentication-with-nginx-on-ubuntu-14-04
+
+http://deanattali.com/2015/05/09/setup-rstudio-shiny-server-digital-ocean/
+http://www.r-bloggers.com/how-to-get-your-very-own-rstudio-server-and-shiny-server-with-digitalocean/
+https://github.com/daattali/shiny-server/blob/master/config/shiny-server.conf
+https://github.com/chrisrzhou/RShiny-EC2Bootstrap

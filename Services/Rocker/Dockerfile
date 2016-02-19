@@ -88,6 +88,11 @@ RUN addgroup --gid 507 nicolazzie && \
     adduser nicolazzie --uid 507 --gid 507 --disabled-password --gecos "Ezequiel Luis Nicolazzi" && \
     echo 'nicolazzie:nicolazzie' | chpasswd
 
+# Another user
+RUN addgroup --gid 505 biscarinif && \
+    adduser biscarinif --uid 505 --gid 505 --disabled-password --gecos "Filippo Biscarini" && \
+    echo 'biscarinif:biscarinif' | chpasswd
+
 
 # Add other users here...
 
