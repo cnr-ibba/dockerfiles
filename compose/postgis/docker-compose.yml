@@ -13,7 +13,6 @@ db:
   # Auto restart container
   restart: always
 
-
   # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
   volumes:
     - "./pg-data:/var/lib/postgresql/data"
