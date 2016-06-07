@@ -2,11 +2,11 @@
 Installing a rstudio image at PTP
 =================================
 
-This guide is describe how to start a rocker image on PTP infrastructure. This image start from the rocker/rstudio image, add some users to the sistem and install openssh server. All the instruction to build the base image are described in the docker file
+This guide is describe how to start a rocker image on PTP infrastructure. This image start from the rocker/rstudio image, add some users to the system. All the instruction to build the base image are described in the docker file
 
 ## Add a new user
 
-Log on login server (41) and get a lock at /etc/passwd (this file doesn't contains user password, insted contain the GID and UID for all our users). Then you can add the required instruction on Dockerfile to build a persistent image or you can log in the container with *root* account and add user inside the container. You have to add first the new group (with the correct GID) and then the correct user (with its UID). Rember to prevent the useradd interaction by using `--disabled-password` and `--gecos` options. For instance, add those line in dockerfiles:
+Log on your NIS server and get a lock at /etc/passwd (this file doesn't contains user password, instead contain the GID and UID for all our users). Then you can add the required instructions on Dockerfile to build a persistent image or you can log in the container with *root* account and add user inside the container. You have to add first the new group (with the correct GID) and then the correct user (with its UID). Rember to prevent the useradd interaction by using `--disabled-password` and `--gecos` options. For instance, add those line in dockerfiles:
 
 ```
 # Adding users from PTP (Read GID and UID from NIS server):
@@ -26,17 +26,29 @@ Build a rocker image with a command like this:
 
 ```sh
 $ docker build --rm -t ptp/rstudio .
-$ docker tag ptp/rstudio:latest ptp/rstudio:0.3
+$ docker tag ptp/rstudio:latest ptp/rstudio:0.4
+```
+
+## Backup a directory outside container
+
+To backing up a directory outside rocker container (for example, to export container
+home directory), you need to run a docker instance using volumes from rocker container
+and volumes from a local directory, for instance:
+
+```sh
+$ docker run -it --rm --volumes-from rstudio -v $(pwd)/rstudio_volume:/data ubuntu:14.04 /bin/bash
+$ cp -ra /home/* /data/
+$ exit
 ```
 
 ## Start the image with a data volume
 
 The data volume isn't required. Moreover it facilitates exporting users home directory between (rocker) containers.
-if you set an exististing directory insider a volume, you can access files outside containers. Start a new volume like this
+if you set an existing directory inside a volume, you can access files outside containers. Start a new volume like this
 
 ```sh
 $ docker create --name rstudio_volume \
-   -v /mnt/dell_storage/cloud/docker/rstudio_volume/:/home/ ptp/rstudio /bin/true
+   -v $(pwd)/rstudio_volume/:/home/ ptp/rstudio:0.4 /bin/true
 ```
 
 Setting volume names facilitates process identification. Next start a new container using this volume. It could be nice also to export host localtime as stated [here](http://stackoverflow.com/questions/22800624/will-docker-container-auto-sync-time-with-the-host-machine)
@@ -44,7 +56,7 @@ Setting volume names facilitates process identification. Next start a new contai
 ```sh
 $ docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume \
    -v /etc/localtime:/etc/localtime:ro -v /mnt/dell_storage/storage/:/storage/ \
-   --cpuset-cpus=0-8 --memory="8G" --restart=always ptp/rstudio
+   --memory="8G" --restart=always ptp/rstudio:0.4
 ```
 
 the `-p` options set the standard rstudio port of the container on the host. It can be omitted with the `-P` options, and docker will bind the service on another port. The `-P` option is useful to export the openssh port of the container. With the `--cpuset-cpus` you can set a CPU interval in which the application can run. Unfortunately at the moment it seems impossible to set CPU dinamically. With the `--memory` option you can set the memory to allocate. You can specify a numeric value with a dimension like M for Mb, G for GB, and so on. More information about docker resource usage can be found [here](https://gist.github.com/afolarin/15d12a476e40c173bf5f).
@@ -80,8 +92,6 @@ You can enter inside the rocker volume with one of the following commands:
 
 ```sh
 $ docker exec -it rstudio /bin/bash
-# Or
-$ ssh -p <rstudio_ssh_port> root@localhost
 ```
 
 ## Restart rstudio-server inside container

@@ -1,18 +1,18 @@
 
 #
-# VERSION 0.3
-# DOCKER-VERSION  1.5.0
-# AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
+# VERSION 0.4
+# DOCKER-VERSION  1.7.1
+# AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    A rocker container with some packages and users added
 # TO_BUILD:       docker build --rm -t ptp/rstudio .
 # CREATE_VOLUME:  docker create --name rstudio_volume ptp/rstudio /bin/true
 # TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ ptp/rstudio
-# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.3
+# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.4
 #
 
 FROM rocker/rstudio
 
-MAINTAINER Paolo Cozzi <paolo.cozzi@tecnoparco.org>
+MAINTAINER Paolo Cozzi <paolo.cozzi@ptp.it>
 
 # Install required packages to compile R libraries (and others utilities)
 # similar to https://registry.hub.docker.com/u/rocker/rstudio/dockerfile/
@@ -24,7 +24,6 @@ RUN rm -rf /var/lib/apt/lists/ && \
     apt-file \
     libmysqlclient-dev \
     libpq-dev \
-    openssh-server \
     vim
 
 # Instructions to install java JDK under rstudio image: https://github.com/cardcorp/card-rocker/blob/master/r-java/Dockerfile
@@ -79,11 +78,6 @@ RUN addgroup --gid 1003 lazzarib && \
     echo 'lazzarib:lazzarib' | chpasswd
 
 # Another user
-RUN addgroup --gid 527 fojadellii && \
-    adduser fojadellii --uid 527 --gid 527 --disabled-password --gecos "Ilaria Fojadelli" && \
-    echo 'fojadellii:fojadellii' | chpasswd
-
-# Another user
 RUN addgroup --gid 507 nicolazzie && \
     adduser nicolazzie --uid 507 --gid 507 --disabled-password --gecos "Ezequiel Luis Nicolazzi" && \
     echo 'nicolazzie:nicolazzie' | chpasswd
@@ -96,36 +90,10 @@ RUN addgroup --gid 505 biscarinif && \
 
 # Add other users here...
 
-# Instructions for ssh found here: https://docs.docker.com/examples/running_ssh_service/
-RUN mkdir /var/run/sshd
-RUN echo 'root:rstudio' | chpasswd
-RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-
-# SSH login fix. Otherwise user is kicked off after login
-RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
-
-# Using the sshd daemon to spawn shells makes it complicated to pass environment variables
-# to the user's shell via the normal Docker mechanisms, as sshd scrubs the environment before it starts the shell.
-# If you're setting values in the Dockerfile using ENV, you'll need to push them to a shell
-# initialization file like the /etc/profile example in the Dockerfile above.
-
-# If you need to passdocker run -e ENV=value values, you will need to write a short
-# script to do the same before you start sshd -D and then replace the CMD with that script.
-ENV NOTVISIBLE "in users profile"
-RUN echo "export VISIBLE=now" >> /etc/profile
-
-# override rocker supervisor.conf to run also openssh server
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# change permissions (as rocker does)
-RUN chgrp staff /etc/supervisor/conf.d/supervisord.conf
 
 # Make a volume easy to export user's libraries
 VOLUME /home/
 
 # Expose the default rocker port
-
-# Espose the openssh port
-EXPOSE 22
 
 # Run the default rocker command
