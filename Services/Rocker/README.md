@@ -20,6 +20,25 @@ RUN addgroup --gid 514 cozzip && \
     echo 'cozzip:cozzip' | chpasswd
 ```
 
+### Users with UID below 1000
+
+By default RStudio Server only allows normal (as opposed to system) users to
+successfully authenticate. The minimum user id is determined by reading the
+UID_MIN value from the /etc/login.defs file. If the file doesn’t exist or
+UID_MIN isn’t defined within it then a default value of 1000 is used.
+You change the minimum user id by specifying the auth-minimum-user-id option in
+`/etc/rstudio/rserver.conf` file:
+
+```
+auth-minimum-user-id=500
+```
+
+This file is included and overwritten in this docker source directory. Modify this
+file according your needs, then rebuild the docker image. You can have more information
+[here](http://docs.rstudio.com/ide/server-pro/authenticating-users.html#restricting-access-to-specific-users).
+More information on RStudio server files can be found also
+[here](https://support.rstudio.com/hc/en-us/articles/200552316-Configuring-the-Server).
+
 ## Build the rocker image
 
 Build a rocker image with a command like this:
@@ -48,18 +67,18 @@ if you set an existing directory inside a volume, you can access files outside c
 
 ```sh
 $ docker create --name rstudio_volume \
-   -v $(pwd)/rstudio_volume/:/home/ ptp/rstudio:0.4 /bin/true
+   -v /mnt/dell_storage/cloud/docker/rstudio_volume/:/home/ ptp/rstudio:0.4 /bin/true
 ```
 
 Setting volume names facilitates process identification. Next start a new container using this volume. It could be nice also to export host localtime as stated [here](http://stackoverflow.com/questions/22800624/will-docker-container-auto-sync-time-with-the-host-machine)
 
 ```sh
-$ docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume \
+$ docker run -d -p 8787:8787 --name rstudio --volumes-from rstudio_volume \
    -v /etc/localtime:/etc/localtime:ro -v /mnt/dell_storage/storage/:/storage/ \
-   --memory="8G" --restart=always ptp/rstudio:0.4
+   --cpuset-cpus=0-8 --memory="8G" --restart=always ptp/rstudio:0.4
 ```
 
-the `-p` options set the standard rstudio port of the container on the host. It can be omitted with the `-P` options, and docker will bind the service on another port. The `-P` option is useful to export the openssh port of the container. With the `--cpuset-cpus` you can set a CPU interval in which the application can run. Unfortunately at the moment it seems impossible to set CPU dinamically. With the `--memory` option you can set the memory to allocate. You can specify a numeric value with a dimension like M for Mb, G for GB, and so on. More information about docker resource usage can be found [here](https://gist.github.com/afolarin/15d12a476e40c173bf5f).
+the `-p` options set the standard rstudio port of the container on the host. It can be omitted with the `-P` options, and docker will bind the service on another port. With the `--cpuset-cpus` you can set a CPU interval in which the application can run. Unfortunately at the moment it seems impossible to set CPU dinamically. With the `--memory` option you can set the memory to allocate. You can specify a numeric value with a dimension like M for Mb, G for GB, and so on. More information about docker resource usage can be found [here](https://gist.github.com/afolarin/15d12a476e40c173bf5f).
 You can inspect the port assigned by docker by using `docker ps` or `docker inspect -f '{{ json .NetworkSettings }}' rstudio | python -mjson.tool`. The first volume exported with the `-v` option is for the HOST localtime (RO mode). The second is the storage partition, which can be modified by each user (under authentication)
 
 If you need to rebuild the image you can re-use the previous rstudio data volumes (if the path exported is the same). Password will be resetted to their default values

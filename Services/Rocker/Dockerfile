@@ -90,6 +90,13 @@ RUN addgroup --gid 505 biscarinif && \
 
 # Add other users here...
 
+# By default RStudio Server only allows normal (as opposed to system) users to
+# successfully authenticate. The minimum user id is determined by reading the
+# UID_MIN value from the /etc/login.defs file. If the file doesn’t exist or
+# UID_MIN isn’t defined within it then a default value of 1000 is used.
+# You change the minimum user id by specifying the auth-minimum-user-id option in
+# /etc/rstudio/rserver.conf
+COPY rserver.conf /etc/rstudio/rserver.conf
 
 # Make a volume easy to export user's libraries
 VOLUME /home/
