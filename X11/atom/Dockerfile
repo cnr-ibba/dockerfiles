@@ -1,17 +1,17 @@
 
 #
-# VERSION 0.3
+# VERSION 0.4
 # DOCKER-VERSION  1.7.1
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    An atom container to work with atom
 # TO_BUILD:       docker build --rm -t atom .
 # TO_RUN:         docker run -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY atom
-# TO_TAG:         docker tag atom:latest atom:0.3
+# TO_TAG:         docker tag atom:latest atom:0.4
 #
 
 # I think is better to download a buildeb package insted of compile atom from source
 # Starting from an image commonly used for build packages
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 MAINTAINER Paolo Cozzi <paolo.cozzi@ptp.it>
 
@@ -33,13 +33,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && apt-get clean
 
 # Download the last stable atom deb package
-RUN wget https://github.com/atom/atom/releases/download/v1.1.0/atom-amd64.deb -O /root/atom-amd64.deb
+RUN wget https://atom-installer.github.com/v1.8.0/atom-amd64.deb -O /root/atom-amd64.deb
 
 # install package with gdebi
 RUN gdebi --non-interactive /root/atom-amd64.deb
 
 # final clean
-RUN apt-get clean && rm -rf /var/lib/apt/lists/
+RUN apt-get clean
 
 # set up user and permission
 RUN export uid=1000 gid=1000 && \
