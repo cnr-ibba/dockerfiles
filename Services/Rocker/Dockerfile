@@ -1,13 +1,13 @@
 
 #
-# VERSION 0.4
+# VERSION 0.5
 # DOCKER-VERSION  1.7.1
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    A rocker container with some packages and users added
 # TO_BUILD:       docker build --rm -t ptp/rstudio .
 # CREATE_VOLUME:  docker create --name rstudio_volume ptp/rstudio /bin/true
 # TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ ptp/rstudio
-# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.4
+# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.5
 #
 
 FROM rocker/rstudio
@@ -24,7 +24,10 @@ RUN rm -rf /var/lib/apt/lists/ && \
     apt-file \
     libmysqlclient-dev \
     libpq-dev \
-    vim
+    vim \
+    nano \
+    libgmp-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/
 
 # Instructions to install java JDK under rstudio image: https://github.com/cardcorp/card-rocker/blob/master/r-java/Dockerfile
 RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" \
@@ -39,13 +42,19 @@ RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" \
     && update-alternatives --display java \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean \
-    && R CMD javareconf
+    && R CMD javareconf \
+    && apt-get clean && rm -rf /var/lib/apt/lists/
 
 # Runnig rstudio instance need to be restarted (rstudio-server restart). There are no problems when building
 # a new rstudio image
 
-# Clean packages and histories
-RUN apt-get clean && rm -rf /var/lib/apt/lists/
+# copy sources.list with deb-src packages
+COPY sources.list /etc/apt/sources.list
+
+# add X11 libraries to build rgl package
+RUN apt-get update \
+    && apt-get -y build-dep r-cran-rgl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/
 
 # Adding users from PTP (Read GID and UID from NIS server):
 # http://askubuntu.com/questions/94060/run-adduser-non-interactively (on debian/ubuntu)
