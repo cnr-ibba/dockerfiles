@@ -26,7 +26,8 @@ RUN rm -rf /var/lib/apt/lists/ && \
     libpq-dev \
     vim \
     nano \
-    libgmp-dev && \
+    libgmp-dev \
+    ghostscript && \
     apt-get clean && rm -rf /var/lib/apt/lists/
 
 # Instructions to install java JDK under rstudio image: https://github.com/cardcorp/card-rocker/blob/master/r-java/Dockerfile
@@ -96,6 +97,15 @@ RUN addgroup --gid 505 biscarinif && \
     adduser biscarinif --uid 505 --gid 505 --disabled-password --gecos "Filippo Biscarini" && \
     echo 'biscarinif:biscarinif' | chpasswd
 
+# Another user
+RUN addgroup --gid 517 capreraa && \
+    adduser capreraa --uid 517 --gid 517 --disabled-password --gecos "Andrea Caprera" && \
+    echo 'capreraa:capreraa' | chpasswd
+
+# Another user
+RUN addgroup --gid 533 masettig && \
+    adduser masettig --uid 533 --gid 533 --disabled-password --gecos "Giulia Masetti" && \
+    echo 'masettig:masettig' | chpasswd
 
 # Add other users here...
 
