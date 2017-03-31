@@ -109,6 +109,11 @@ RUN addgroup --gid 533 masettig && \
 
 # Add other users here...
 
+# Add groups and users to groups
+RUN addgroup --gid 1002 ngs && \
+    usermod -a -G ngs cozzip && \
+    usermod -a -G ngs giannicor
+
 # By default RStudio Server only allows normal (as opposed to system) users to
 # successfully authenticate. The minimum user id is determined by reading the
 # UID_MIN value from the /etc/login.defs file. If the file doesn’t exist or

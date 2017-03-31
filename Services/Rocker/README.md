@@ -39,6 +39,17 @@ file according your needs, then rebuild the docker image. You can have more info
 More information on RStudio server files can be found also
 [here](https://support.rstudio.com/hc/en-us/articles/200552316-Configuring-the-Server).
 
+## Add user to groups
+
+You can manage user and secondary groups with:
+
+```
+# Add groups and users to groups
+RUN addgroup --gid 1002 ngs && \
+    usermod -a -G ngs cozzip && \
+    usermod -a -G ngs giannicor
+```
+
 ## Build the rocker image
 
 Build a rocker image with a command like this:
