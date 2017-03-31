@@ -1,0 +1,10 @@
+[color]
+	ui = true
+[credential]
+	helper = cache
+[format]
+	pretty = %h - %an, %ar : %s
+[merge]
+	tool = vimdiff
+[alias]
+	mytree = log --graph --pretty=format:'%C(yellow)%h%Creset%C(red)%d%Creset %C(white bold)%s%Creset %C(white dim)(by %an %ar)%Creset' --all 
