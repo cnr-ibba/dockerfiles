@@ -1,2 +1,4 @@
 uwsgi
+mysqlclient
+psycopg2
 Django==1.11

@@ -87,7 +87,7 @@ Django script will be served using the uwsgi server. You can get more informaton
 
 Take a look in to the web directory:
 
-```sh
+```
 $ tree web
 web/
 ├── Dockerfile
@@ -99,13 +99,31 @@ web/
 
 ### Creating a project for the first time
 
-For such example, we suppose that the django project name will be `mysite` as stated by the [django tutorial](https://docs.djangoproject.com/en/1.8/intro/tutorial01/#creating-a-project). Now you can build the django image from its `Dockerfile` or build it automatically with `docker-compose`. In this case, we initialize a new project and we build a new docker image if it not exists (since we have not specified a destination directory, a `mysite` project directory is created and placed under /var/uwsgi/. Inside mysite, we will have `manage.py`):
+For such example, we suppose that the django project name will be `mysite` as stated
+by the [django tutorial](https://docs.djangoproject.com/en/1.11/intro/tutorial01/#creating-a-project).
+Now you can build the django image from its `Dockerfile` or build it automatically
+with `docker-compose`. In this case, we initialize a new project and we build a new
+docker image if it not exists (since we have not specified a destination directory,
+a `mysite` project directory is created and placed under /var/uwsgi/.
+Inside mysite, we will have `manage.py`):
 
-```sh
+```
 $ docker-compose run --rm web django-admin.py startproject mysite
 ```
 
-This will build the django image and runs the `django-admin.py` script. If there are prerequisites, for example containers linked to that, they will be started before the `web` django container. After that, the container stops and we return to the shell environment. Now we need to set up the database connection. You may want change default ownership to edit files. Replace the DATABASES = ... definition in `django-data/mysite/settings.py` accordingly your project database settings:
+This will build the django image and runs the `django-admin.py` script. If there
+are prerequisites, for example containers linked to that, they will be started before
+the `web` django container. After that, the container stops and we return to the
+shell environment. You may want to fix file permissins in order to edit files, for
+example:
+
+```
+$ sudo chown -R ${USER}:${USER} django-data
+```
+
+Now we need to set up the database connection. You may want
+change default ownership to edit files. Replace the `DATABASES = ...` definition
+in `django-data/mysite/mysite/settings.py` accordingly your project database settings:
 
 ```python
 DATABASES = {
@@ -120,13 +138,18 @@ DATABASES = {
 }
 ```
 
-Note that the `db` host is the same name used in `docker-compose.yml`. User, database and password are the same specified in the example above. Remember to set the timezone: docker compose will export HOST /etc/localtime in read only mode, but it's better to set timezone also in django in order to have correct times:
+Note that the `db` host is the same name used in `docker-compose.yml`. User, database
+and password are the same specified in the example above. Remember to set the timezone:
+docker compose will export HOST /etc/localtime in read only mode, but it's better
+to set timezone also in django in order to have correct times:
 
 ```python
 TIME_ZONE = 'Europe/Rome'
 ```
 
-We have to set also the static file positions. It's better to prepend the django project names in order to write rules to serve static files via ngnix. Here is an example for mysite project:
+We have to set also the static file positions. It's better to prepend the django
+project names in order to write rules to serve static files via nginx. Here is an
+example for mysite project:
 
 ```python
 # Static files (CSS, JavaScript, Images)
@@ -137,9 +160,13 @@ STATIC_URL = '/mysite/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 ```
 
-The `STATIC_URL` variable will tell to django (uwsgi) how to define links to static files, and the `STATIC_ROOT` variable will set the position in which static files (as the admin .css files) will be placed. You may want to create a `/static/media` directory inside `mysite`, in order to place media files. Then you have to call the `collectstatic` command in order to place the static files in their directories:
+The `STATIC_URL` variable will tell to django (uwsgi) how to define links to static
+files, and the `STATIC_ROOT` variable will set the position in which static files
+(as the admin .css files) will be placed. You may want to create a `/static/media`
+directory inside `mysite`, in order to place media files. Then you have to call
+the `collectstatic` command in order to place the static files in their directories:
 
-```sh
+```
 $ mkdir django-data/mysite/static/
 $ mkdir django-data/mysite/media/
 $ docker-compose run --rm web python mysite/manage.py collectstatic
@@ -147,28 +174,23 @@ $ docker-compose run --rm web python mysite/manage.py collectstatic
 
 #### Auto restart uwsgi when code is modified:
 
-As stated in [uWSGI + django autoreload mode](http://projects.unbit.it/uwsgi/wiki/TipsAndTricks#uWSGIdjangoautoreloadmode), add those lines in your `wsgi.py` application
-
-```python
-import uwsgi
-from uwsgidecorators import timer
-from django.utils import autoreload
-
-@timer(3)
-def change_code_gracefull_reload(sig):
-    if autoreload.code_changed():
-        uwsgi.reload()
-```
+As stated [here](http://uwsgi-docs.readthedocs.io/en/latest/ThingsToKnow.html?highlight=autoreload)
+autoreload could be CPU intensive and must be used only in developmente environment:
+*"Some plugins (most notably Python and Perl) have code auto-reloading facilities.
+Although they might sound very appealing, you MUST use them only under development
+as they are really heavy-weight. For example the Python –py-autoreload option will
+scan your whole module tree at every check cycle."*
 
 #### Initialize django database for the first time
 
-You may want to run the following commands to create the necessary django table if django database is empty
+You may want to run the following commands to create the necessary django tables
+if django database is empty.
 
-```sh
-$ docker-compose run web python mysite/manage.py syncdb
+```
+$ docker-compose run --rm web python mysite/manage.py migrate
 ```
 
-Take note of user and password of the privileged django user
+More info could be found [here](https://docs.djangoproject.com/en/1.11/intro/tutorial02/#database-setup)
 
 ### Add an existing project to django container
 

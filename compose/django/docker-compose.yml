@@ -3,9 +3,6 @@ db:
   # get the latest mysql server
   image: mysql:5.6
 
-  # Auto restart container
-  restart: always
-
   # Set db environment
   environment:
     MYSQL_ROOT_PASSWORD: my-secret-pw
@@ -17,17 +14,26 @@ db:
 
 
 web:
+  # a custom image for django
   build: ./web
-  command: uwsgi --ini /etc/django_uwsgi.ini
+
+  # exec a different command from image
+  command: uwsgi --ini /var/uwsgi/mysite_uwsgi.ini
+
+  # set working dir for uwsgi
   working_dir: /var/uwsgi/
+
+  # define volumes
   volumes:
     - "./django-data/:/var/uwsgi/"
     - "/etc/localtime:/etc/localtime:ro"
-  #Expose ports without publishing them to the host machine
-  expose:
-    - "8000"
+
+  # Expose the default port
+
+  # link container to database
   links:
     - db
+
 
 php:
   build: ./php
@@ -38,6 +44,7 @@ php:
     - "9000"
   links:
     - db
+
 
 nginx:
   # get the latest nginx image

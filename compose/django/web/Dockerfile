@@ -33,9 +33,6 @@ RUN pip install -r /root/requirements.txt
 # Set corrent working directory
 WORKDIR /var/uwsgi/
 
-# Add the uwsgi.ini file (not in the volume directory)
-#COPY mysite_uwsgi.ini /etc/django/uwsgi.ini
-
 # Set uwsgi directory as VOLUME
 VOLUME /var/uwsgi/
 
