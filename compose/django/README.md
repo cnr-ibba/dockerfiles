@@ -203,61 +203,6 @@ $ mkdir django-data/mysite/media
 $ mkdir django-data/mysite/static
 ```
 
-## Create phpMyAdmin container
-
-phpMyadmin will be served using `php-fpm` server. You can find some useful information here:
-
-* [phpMyAdmin installation](http://docs.phpmyadmin.net/en/latest/setup.html)
-* [FastCGI Process Manager (FPM)](http://php.net/manual/en/install.fpm.php)
-* [Nginx and PHP-FPM Configuration and Optimizing Tips and Tricks](http://www.if-not-true-then-false.com/2011/nginx-and-php-fpm-configuration-and-optimizing-tips-and-tricks/)
-* [Example configuration of php-fpm](https://github.com/perusio/php-fpm-example-config)
-
-First, take a look inside php directory:
-
-```sh
-$ tree php/
-php/
-├── config.inc.php
-├── Dockerfile
-└── php-fpm.conf
-```
-
-In the `php-fpm.conf` there are some configuration for `php-fpm` process. You can change some parameters if you want, but this file is independent from your django instace. Instead in the `Dockerfile` there are this statement that need to be modified in order to work when proxy passing from a host server to docker-compose nginx. In such case `mysite` is the location in which I want to serve docker-compose phpmyadmin:
-
-```
-# Create a symbolik link in order to serve phpmyadmin under "/mysite" location
-RUN mkdir /var/www/html/mysite \
-    && ln -s /var/www/html/phpmyadmin/ /var/www/html/mysite
-```
-
-In `Dockerfile` all modules required by php application need to be installed using the `docker-php-ext-install` provied inside the container. If the build fails, you need to install all the dependancies via `apt-get` as stated in [How to install more PHP extensions](https://github.com/docker-library/docs/tree/master/php#how-to-install-more-php-extensions)
-
-In the `config.inc.php` there are parameter configuration in order to work with phpmyadmin. You may want to change the name of `$cfg['Servers'][$i]['verbose']` variable, in order to set the name of your project database name. The default database used by phpmyadmin control user is `phpmyadmin`. You can change the control user credential, if you prefer. Next you have to add phpmyadmin control user to your database, grant him his privileges and create phpmyadmin database and tables. Build the php volume for phpmyadmin:
-
-```sh
-$ docker-compose build php
-```
-
-You now have an image, like the others with <project_name> as a prefix. You can see the exact name using `docker images | head`. Create a data-volume and then link it to a MySQL client image in order to do all stuff. You need to create a control user with the same credential specified in `config.inc.php`:
-
-```sh
-$ docker create --name phpmyadmin_volume <project_name>_php /bin/true
-$ docker run -it --link <mysql_running_container>:mysql --volumes-from phpmyadmin_volume --rm mysql /bin/bash
-
-# inside the running container. The $MYSQL_ROOT_PASSWORD is not set when using /bin/bash !!!
-
-$ cd /var/www/html/phpmyadmin/sql
-$ mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"my-secret-pw"
-mysql> CREATE DATABASE phpmyadmin;
-mysql> GRANT SELECT, INSERT, UPDATE, DELETE ON phpmyadmin.* TO 'pma'@'%'  IDENTIFIED BY 'pmapass';
-mysql> \. create_tables.sql
-mysql> exit
-$ exit
-
-# clear unnecessary volumes
-$ docker rm phpmyadmin_volume
-```
-
 ## Create NGINX container
 
 Let's take a look inside nginx directory:
@@ -286,8 +231,8 @@ $ docker-compose logs
 ```
 Container could be stopped and restarted via `docker-compose` compose. Even if container are dropped, all files in *data volumes* directories remains and don't need to be reconfigure as the first instance. You can also run management commands with Docker. To migrate django database, for example, you can run:
 
-```sh
-$ docker-compose run web python mysite/manage.py syncdb
+```
+$ docker-compose run --rm web python mysite/manage.py migrate
 ```
 
 ## Serving docker containers in docker HOST
