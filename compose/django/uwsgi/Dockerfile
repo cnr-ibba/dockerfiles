@@ -4,9 +4,9 @@
 # DOCKER-VERSION  1.9.1
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    A django container working on LTS django 1.11 on python 3
-# TO_BUILD:       docker build --rm -t django_web .
-# TO_RUN:         docker run -d -P django_web
-# TO_TAG:         docker tag django_web:latest django_web:0.5
+# TO_BUILD:       docker build --rm -t django_uwsgi .
+# TO_RUN:         docker run -d -P django_uwsgi
+# TO_TAG:         docker tag django_uwsgi:latest django_uwsgi:0.5
 #
 
 # The official django image is deprecated in favor of the standard python image

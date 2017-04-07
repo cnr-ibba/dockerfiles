@@ -13,9 +13,9 @@ db:
     - "/etc/localtime:/etc/localtime:ro"
 
 
-web:
+uwsgi:
   # a custom image for django
-  build: ./web
+  build: ./uwsgi
 
   # exec a different command from image
   command: uwsgi --ini /var/uwsgi/mysite_uwsgi.ini
@@ -36,13 +36,20 @@ web:
 
 
 nginx:
-  # get the latest nginx image
+  # a custom image for NGINX
   build: ./nginx
+
   volumes:
     - "/etc/localtime:/etc/localtime:ro"
+    - "./nginx/conf.d/:/etc/nginx/conf.d/"
+
+  # get volumes from uwsgi
   volumes_from:
-    - web
+    - uwsgi
+
   ports:
     - "10080:80"
+
+  # link container uwsgi
   links:
-    - web
+    - uwsgi
