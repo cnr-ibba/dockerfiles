@@ -2,7 +2,7 @@
 Running Django+MySQL-uwsgi with docker-compose
 ==============================================
 
-This guide describe how to build a running Django+MySQl running with docker-compose. First of all copy all this directory in another location. You will modify something to develop your application. Next, rename the whole directory with a project name. In this example, all names are set to mysite. Replace all mysite occurences with your project name. All docker container instances will have such name as a prefix in their name. There are some directory that will be mounted as data volume: this will make easier to develop the code or re-spawn the docker application on another location using the same volume directory (as it would be for mysql-data directory). For this model, al MySQL data file will be placed in `mysql-data` directory inside this project; All django data will be placed in `django-data` directory inside this project. When such directories are created for the first time, there are created and mounted as a root directories. After permission can be fixed according user esigence. However processes like ngnix, uswgi and php-fpm work with a different user from root, and so files have to be accessed in read mode
+This guide describe how to build a running Django+MySQl running with docker-compose. First of all copy all this directory in another location. You will modify something to develop your application. Next, rename the whole directory with a project name. In this example, all names are set to mysite. Replace all mysite occurences with your project name. All docker container instances will have such name as a prefix in their name. There are some directory that will be mounted as data volume: this will make easier to develop the code or re-spawn the docker application on another location using the same volume directory (as it would be for mysql-data directory). For this model, al MySQL data file will be placed in `mysql-data` directory inside this project; All django data will be placed in `django-data` directory inside this project. When such directories are created for the first time, there are created and mounted as a root directories. After permission can be fixed according user need. However processes like ngnix, uswgi and php-fpm work with a different user from root, and so files have to be accessed in read mode
 
 ## The docker-compose.yml file
 
@@ -13,25 +13,35 @@ Before to start take a look in the `docker-compose.yml` file. This is the config
 3. `php`: in this container there will be the phpmyadmin served by php-fpm server. This container will be linked with `db` container
 4. `nginx`: this container will have nginx installed. All static file will be served by nginx by sharing static content as docker volumes between containers. php and django files will be served by the appropriate container via fastCGI plugin.
 
-Those name will be placed in each container `/etc/hosts` files, so you can ping `web` host inside `nginx` container, for instance, mo matter what ip addresses will be given to the container by docker. When starting a project for the first time, data directory and inital configuration have to be defined. Data directories will be placed inside thsi directory, in order to facilitate `docker-compose` commands once docker images where configured for the application. When data directories are created for the first time, the ownership of such directories is the same of the service running in the container. You can change it as you prefer, but remember that service run under a *non privileged* user, so you have to define **at least** the *read* privileged for files, and the *read-execute* privileges for directories.
+Those name will be placed in each container `/etc/hosts` files, so you can ping `web` host inside `nginx` container, for instance, mo matter what ip addresses will be given to the container by docker. When starting a project for the first time, data directory and inital configuration have to be defined. Data directories will be placed inside this directory, in order to facilitate `docker-compose` commands once docker images where configured for the application. When data directories are created for the first time, the ownership of such directories is the same of the service running in the container. You can change it as you prefer, but remember that service run under a *non privileged* user, so you have to define **at least** the *read* privileged for files, and the *read-execute* privileges for directories.
 
 ## Create the MySQL container
 
-When MySQL is started from a docker container, all data directories have to be created, so is preferred to start MySQL manually for the first time. I such way, we can set the MySQL root password for the first time. The container can be instantiated with `docker-compose run` by passing the MySQL root password by `MYSQL_ROOT_PASSWORD` as stated by [mysql docker documentation](https://registry.hub.docker.com/u/library/mysql/). The last `db` word in this command line is the name of mysql container
+Before building and instantiating containers, you need to modify the `MYSQL_ROOT_PASSWORD`
+variables according your needs. Then you can build and run containers by typing:
 
-```sh
-$ docker-compose run -d -e MYSQL_ROOT_PASSWORD=my-secret-pw db
+```
+$ docker-compose up -d db
 ```
 
-Once MySQL is istantiated for the first time or `mysql-data` directory is created or derived from another container, MySQL can be run with `docker-compose` standard commands.
+Once MySQL is istantiated for the first time or `mysql-data` directory is created
+or derived from another container, MySQL can be run with `docker-compose` standard
+commands. Once MySQL data files are created (you can inspecy MySQL logs with
+`docker-compose logs`), connect to MySQL database and create database and users
+needed from MySQL connections. The MySQL container defined in `docker-compose.yml`,
+never expose a port outside. You can get a mysql client to this container by
+linking a new  container, for instance:
 
-The `$MYSQL_ENV_MYSQL_ROOT_PASSWORD` must be the same password chosen when database was created. Once MySQL data files are created (you can inspecy MySQL logs with `docker logs`), connect to MySQL database and create database and users needed from MySQL connections. The MySQL container defined in `docker-compose.yml`, never expose a port outside. You can get a mysql client to this container by linking a new  container, for instance:
-
-```sh
-$ docker run -it --link <mysql_running_container>:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
+```
+$ docker run -it --link <mysql_running_container>:mysql -e MYSQL_ROOT_PASSWORD="my-secret-pw" \
+  --rm mysql:5.6 sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" \
+  -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 ```
 
-The `--link <mysql_running_container>:mysql` specifies the MySQL running container and an alias for this. You can get the running container names using `docker-compose ps` or `docker ps` command. Now create a database and a user for the django instance with permission to work on such database
+The `--link <mysql_running_container>:mysql` specifies the MySQL running container
+and an alias for this. You can get the running container names using `docker-compose ps`
+or `docker ps` command. Now create a database and a user for the django instance
+with permission to work on such database
 
 ```SQL
 mysql> CREATE DATABASE mysite ;
@@ -39,42 +49,31 @@ mysql> GRANT ALL PRIVILEGES ON mysite.* TO django@'%' IDENTIFIED BY 'django' ;
 mylsq> exit;
 ```
 
-Next, you can shut down the MySQL running container, in order to control it via docker-compose. You can do it with a docker command:
-
-```sh
-$ docker stop <mysql_running_container>
-```
-
-where `<mysql_running_container>` is the container in which mysql server is running. You can also remove the stopped running container: MySQL data directory was created inside `mysql-data` directory, which will be imported as a volume as it is in the next compose run. You never need to restart database from scratch until you have `mysql-data` directory.
-
 ### Dumping data from database
 
 With the docker run command, you can do a `mysite` database dump:
 
-```sh
-$ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" --rm mysql sh -c 'exec mysqldump -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" mysite > /data/mysite_dump.sql'
+```
+$ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" \
+  --rm mysql:5.6 sh -c 'exec mysqldump -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" \
+  -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" mysite > /data/mysite_dump.sql''
 ```
 
-Note as variables like `MYSQL_ROOT_PASSWORD="my-secret-pw"` are traslated with a prefix `MYSQL_ENV_` inside running container. Since in this example the default password is `my-secret-pw` you may not specify this environment variable inside the running container or by passing the `-e VARIABLE=VALUE` syntax. The dump will be write in the `/data` volumes directory, which is your current `$PWD` directory. The ownership of dump file is the same of the `$USER` in the running container.
+Note as variables like `MYSQL_ROOT_PASSWORD="my-secret-pw"` are traslated with the
+prefix `MYSQL_ENV_` inside running container. The dump will be write in the `/data`
+volumes directory, which is your current `$PWD` directory. The ownership of dump
+file is the same of the `$USER` in the running container.
 
 ### Loading data in database
 
-With the docker run command, you can import a `<file>.sql' file by adding its path as a docker volume, for instance, if you are in `mysite_dump.sql` directory:
+With the docker run command, you can import a `.sql` file by adding its path as
+a docker volume, for instance, if you are in `mysite_dump.sql` directory:
 
-```sh
-$ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" mysite < /data/mysite_dump.sql'
 ```
-
-### Removing stopped container
-
-Container started via `docker-compose run`  or `docker run` will be automatically removed when they are stopped if the `--rm` parameter is provided (however we can not give `--rm` parameter in `-d` detached mode). You have to stop running detached container and to remove them with `docker` commands like this:
-
-```sh
-$ docker stop <mysql_running_container>
-$ docker rm <mysql_running_container>
+$ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" \
+  --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" \
+  -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" mysite < /data/mysite_dump.sql'
 ```
-
-All data inside the `mysql-data` directory will remains.
 
 ## Create django container
 

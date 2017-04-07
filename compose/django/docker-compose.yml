@@ -3,18 +3,25 @@ db:
   # get the latest mysql server
   image: mysql:5.6
 
+  # Auto restart container
+  restart: always
+
+  # Set db environment
+  environment:
+    MYSQL_ROOT_PASSWORD: my-secret-pw
+
   # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
   volumes:
-    - "mysql-data:/var/lib/mysql"
+    - "./mysql-data:/var/lib/mysql"
     - "/etc/localtime:/etc/localtime:ro"
 
-    
+
 web:
   build: ./web
   command: uwsgi --ini /etc/django_uwsgi.ini
   working_dir: /var/uwsgi/
   volumes:
-    - "django-data/:/var/uwsgi/"
+    - "./django-data/:/var/uwsgi/"
     - "/etc/localtime:/etc/localtime:ro"
   #Expose ports without publishing them to the host machine
   expose:
@@ -31,7 +38,7 @@ php:
     - "9000"
   links:
     - db
-    
+
 nginx:
   # get the latest nginx image
   build: ./nginx
@@ -45,4 +52,3 @@ nginx:
   links:
     - web
     - php
-    
