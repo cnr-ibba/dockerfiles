@@ -74,6 +74,27 @@ $ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_
   -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" mysite < /data/mysite_dump.sql'
 ```
 
+### Access database using phpmyadmin
+
+You can access to mysql container using phpmyadmin, simply type
+
+```
+$ docker-compose ps
+```
+
+To get container name on which MySQL is running, then you can use the official
+phpmyadmin image, for example:
+
+```
+$ docker run --name phpmyadmin -d --link <mysql_running_container>:db -p 8080:80 phpmyadmin/phpmyadmin:latest
+```
+
+More information on phpmyadmin image could be found [here][phpmyadmin-image] or
+in official phpmyadmin [documentation][phpmyadmin-docker-documentation]
+
+[phpmyadmin-image]: https://hub.docker.com/r/phpmyadmin/phpmyadmin/
+[phpmyadmin-docker-documentation]: https://docs.phpmyadmin.net/en/latest/setup.html#installing-using-docker
+
 ## Create django container
 
 Django script will be served using the uwsgi server. You can get more informaton here:

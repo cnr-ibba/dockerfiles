@@ -13,6 +13,21 @@ db:
     - "/etc/localtime:/etc/localtime:ro"
 
 
+# a variant of db image using postgresql Database
+# db:
+#   # get the latest postgres server
+#   image: postgres:9.6
+#
+#   # Set db environment
+#   environment:
+#     POSTGRES_PASSWORD: my-secret-pw
+#
+#   # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
+#   volumes:
+#     - "./postgres-data:/var/lib/postgresql/data"
+#     - "/etc/localtime:/etc/localtime:ro"
+
+
 uwsgi:
   # a custom image for django
   build: ./uwsgi

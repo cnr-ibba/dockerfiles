@@ -10,7 +10,7 @@
 #
 
 # Get the last stable nginx image
-FROM nginx:1.10
+FROM nginx:1.11
 
 MAINTAINER Paolo Cozzi <paolo.cozzi@ptp.it>
 
