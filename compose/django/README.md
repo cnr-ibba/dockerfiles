@@ -12,7 +12,7 @@ Before to start take a look in the `docker-compose.yml` file. This is the config
 2. `uwsgi`: this will be the django container in which uwsgi server will run. This container will be linked with `db` container
 3. `nginx`: this container will have nginx installed. All static file will be served by nginx by sharing static content as docker volumes between containers. Django files will be served by the appropriate container via fastCGI plugin.
 
-Those name will be placed in each container `/etc/hosts` files, so you can ping `uwsgi` host inside `nginx` container, for instance, no matter what ip addresses will be given to the container by docker. When starting a project for the first time, data directory and inital configuration have to be defined. Data directories will be placed inside this directory, in order to facilitate `docker-compose` commands once docker images where configured for the application. When data directories are created for the first time, the ownership of such directories is the same of the service running in the container. You can change it as you prefer, but remember that service run under a *non privileged* user, so you have to define **at least** the *read* privileged for files, and the *read-execute* privileges for directories.
+Those name will be placed in each container `/etc/hosts` files, so you can ping `uwsgi` host inside `nginx` container, for instance, no matter what ip addresses will be given to the container by docker. When starting a project for the first time, data directory and initial configuration have to be defined. Data directories will be placed inside this directory, in order to facilitate `docker-compose` commands once docker images where configured for the application. When data directories are created for the first time, the ownership of such directories is the same of the service running in the container. You can change it as you prefer, but remember that service run under a *non privileged* user, so you have to define **at least** the *read* privileged for files, and the *read-execute* privileges for directories.
 
 ## Create the MySQL container
 
@@ -88,12 +88,27 @@ phpmyadmin image, for example:
 ```
 $ docker run --name phpmyadmin -d --link <mysql_running_container>:db -p 8080:80 phpmyadmin/phpmyadmin:latest
 ```
-
 More information on phpmyadmin image could be found [here][phpmyadmin-image] or
 in official phpmyadmin [documentation][phpmyadmin-docker-documentation]
 
 [phpmyadmin-image]: https://hub.docker.com/r/phpmyadmin/phpmyadmin/
 [phpmyadmin-docker-documentation]: https://docs.phpmyadmin.net/en/latest/setup.html#installing-using-docker
+
+### Access database using adminer
+
+You need to derive the `db` container name, for example with `docker-compose ps`.
+Then you can launch adminer like this:
+
+```
+$ docker run --name adminer -d --link <mysql_running_container>:db -p 8080:8080 adminer
+```
+
+You could choose to pass `-p 8080` only in order to get a random port in which adminer
+is listening, you will need to determine the port with `docker ps -a` and then use
+a browser to point to adminer instance, for example `http://<your_host>:<your_port`.
+More information could be found in [adminer - docker hub][adminer-docker-documentation]
+
+[adminer-docker-documentation]: https://hub.docker.com/_/adminer/
 
 ## Create django container
 
@@ -120,7 +135,10 @@ uwsgi
 
 For such example, we suppose that the django project name will be `mysite` as stated
 by the [django tutorial](https://docs.djangoproject.com/en/1.11/intro/tutorial01/#creating-a-project).
-The `mysite_uwsgi.ini` in `django-data` directory contains uwsgi configuration for this application. The default path of the application is the `mysite` directory of the django tutorial. If you want to modify the project directories, remember to modify `docker-compose.yml` and to rename `mysite_uwsgi.ini`commands according your needs.
+The `mysite_uwsgi.ini` in `django-data` directory contains uwsgi configuration for this application.
+The default path of the application is the `mysite` directory of the django tutorial.
+If you want to modify the project directories, remember to modify `docker-compose.yml`
+and to rename `mysite_uwsgi.ini`commands according your needs.
 Now you can build the django image from its `Dockerfile` or build it automatically
 with `docker-compose`. In this case, we initialize a new project and we build a new
 docker image if it not exists (since we have not specified a destination directory,
@@ -156,6 +174,18 @@ DATABASES = {
         'PORT': 3306,
     }
 }
+
+# configuration for postgres Database
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',
+#         'USER': 'postgres',
+#         'PASSWORD': 'my-secret-pw',
+#         'HOST': 'db',
+#         'PORT': 5432,
+#     }
+# }
 ```
 
 Note that the `db` host is the same name used in `docker-compose.yml`. User, database
@@ -225,7 +255,11 @@ credentials
 
 ### Add an existing project to django container
 
-The `django-data` directory need to be create if does't exists. Then you have to create a <project name> directory in which put the `manage.py`. Static files needs to be placed inside the <project name> directory, or links or static urls needs to be modified in order to be served correctly. For instance, to place a django project into a `mysite` directory:
+The `django-data` directory need to be create if does't exists. Then you have to
+create a <project name> directory in which put the `manage.py`. Static files needs
+to be placed inside the <project name> directory, or links or static urls needs
+to be modified in order to be served correctly. For instance, to place a django
+project into a `mysite` directory:
 
 ```sh
 $ mkdir -p django-data/mysite
@@ -281,12 +315,26 @@ $ docker-compose run --rm uwsgi python mysite/manage.py migrate
 ## Serving docker containers in docker HOST
 
 You can serve docker compose using HOST NGINX, for instance, via proxy_pass.
-Place the followin code inside NGINX server environment. Remember to specify the port exported by your docker NGINX instance:
+Place the followin code inside NGINX server environment. Remember to specify the
+port exported by your docker NGINX instance:
 
 ```
-location /mysite {
-    # Subitting a request to docker service
-    proxy_pass http://localhost:10080;
-    proxy_redirect http://localhost:10080/ $scheme://$http_host/;
+location /mysite/ {
+  # set variable in location
+  set $my_port 10080;
+
+  # Add info to webpages
+  proxy_set_header Host $host;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Host $host:$my_port;
+  proxy_set_header X-Forwarded-Server $host;
+  proxy_set_header X-Forwarded-Port $my_port;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  proxy_pass_header Set-Cookie;
+
+  # Subitting a request to docker service
+  proxy_pass http://<your_host>:$my_port;
+  proxy_redirect http://$host:$my_port/ $scheme://$http_host/;
 }
 ```
