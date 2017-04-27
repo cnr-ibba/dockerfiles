@@ -55,7 +55,7 @@ With the docker run command, you can do a `mysite` database dump:
 ```
 $ docker run -it --link <mysql_running_container>:mysql -v $PWD:/data/ -e MYSQL_ROOT_PASSWORD="my-secret-pw" \
   --rm mysql:5.6 sh -c 'exec mysqldump -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" \
-  -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" mysite > /data/mysite_dump.sql''
+  -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" mysite > /data/mysite_dump.sql'
 ```
 
 Note as variables like `MYSQL_ROOT_PASSWORD="my-secret-pw"` are traslated with the
@@ -159,6 +159,20 @@ example:
 $ sudo chown -R ${USER}:${USER} django-data
 ```
 
+Next, you may need to set a list of strings representing the host/domain
+names that this Django site can serve: you will modify the `ALLOWED_HOSTS`
+as described [here][django-allowed-host]. You may need also to unset the
+`DEBUG` option:
+
+[django-allowed-host]: https://docs.djangoproject.com/en/1.11/ref/settings/#allowed-hosts
+
+```python
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
+
+ALLOWED_HOSTS = ['*']
+```
+
 Now we need to set up the database connection. You may want
 change default ownership to edit files. Replace the `DATABASES = ...` definition
 in `django-data/mysite/mysite/settings.py` accordingly your project database settings:
@@ -203,16 +217,19 @@ example for mysite project:
 
 ```python
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
+# https://docs.djangoproject.com/en/1.11/howto/static-files/
 STATIC_URL = '/mysite/static/'
+MEDIA_URL  = '/mysite/media/'
 
 # collect all Django static files in the static folder
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 ```
 
 The `STATIC_URL` variable will tell to django (uwsgi) how to define links to static
 files, and the `STATIC_ROOT` variable will set the position in which static files
-(as the admin .css files) will be placed. You may want to create a `/static/media`
+(as the admin .css files) will be placed. The `MEDIA_ROOT` and `MEDIA_URL` variables
+have the same behaviour. You may want to create a `/static` and `/media`
 directory inside `mysite`, in order to place media files. Then you have to call
 the `collectstatic` command in order to place the static files in their directories:
 
