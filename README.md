@@ -1,6 +1,4 @@
-DockeFiles
-==========
+DockerFiles
+===========
 
-Personal repository for Dockerfiles.
-
-
+Template repository for `docker` and `docker-compose` files

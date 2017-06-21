@@ -248,13 +248,27 @@ Although they might sound very appealing, you MUST use them only under developme
 as they are really heavy-weight. For example the Python –py-autoreload option will
 scan your whole module tree at every check cycle."*
 
+#### Change working_dir in docker compose file
+
+To avoid the necessity of specify relative path every time `manage.py` is called,
+you may want to change the working_directory in `docker-compose.yml` file to point
+on your application directory, for example:
+
+```yaml
+  # set working dir for uwsgi
+  working_dir: /var/uwsgi/mysite
+```
+
+This allows to call `manage.py` from the `mysite` project directory
+
 #### Initialize django database for the first time
 
 You may want to run the following commands to create the necessary django tables
-if django database is empty.
+if django database is empty. The path of `manage.py` is not specified, since we
+changed the `working_dir` in `docker-compose.yml`:
 
 ```
-$ docker-compose run --rm uwsgi python mysite/manage.py migrate
+$ docker-compose run --rm uwsgi python manage.py migrate
 ```
 
 More info could be found [here](https://docs.djangoproject.com/en/1.11/intro/tutorial02/#database-setup)
@@ -264,7 +278,7 @@ More info could be found [here](https://docs.djangoproject.com/en/1.11/intro/tut
 You  need to create a user who can login to the admin site. Run the following command:
 
 ```
-$ docker-compose run --rm uwsgi python mysite/manage.py createsuperuser
+$ docker-compose run --rm uwsgi python manage.py createsuperuser
 ```
 
 A user and password for the admin user will be prompted. Ensure to track such
@@ -320,6 +334,7 @@ You can inspect docker logs with
 ```
 $ docker-compose logs
 ```
+
 Container could be stopped and restarted via `docker-compose` compose. Even if
 container are dropped, all files in *data volumes* directories remains and don't
 need to be reconfigured as the first instance. You can also run management commands
@@ -328,6 +343,14 @@ with Docker. To migrate django database, for example, you can run:
 ```
 $ docker-compose run --rm uwsgi python mysite/manage.py migrate
 ```
+
+Or
+
+```
+$ docker-compose run --rm uwsgi python manage.py migrate
+```
+
+If you have set the `working_dir` in `docker-compose.yml` properly.
 
 ## Serving docker containers in docker HOST
 
