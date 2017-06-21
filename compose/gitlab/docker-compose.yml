@@ -1,0 +1,17 @@
+
+gitlab:
+  container_name: gitlab
+  image: gitlab/gitlab-ce:9.2.5-ce.0
+  hostname: gitlab
+  environment:
+    GITLAB_OMNIBUS_CONFIG: |
+      external_url 'http://127.0.0.1:8050'
+      gitlab_rails['gitlab_shell_ssh_port'] = 522
+  ports:
+    - "8050:8050"
+    - "522:22"
+  volumes:
+    - ./config:/etc/gitlab
+    - ./logs:/var/log/gitlab
+    - ./data:/var/opt/gitlab
+# privileged: true
