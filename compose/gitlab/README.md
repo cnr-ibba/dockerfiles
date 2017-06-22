@@ -29,9 +29,11 @@ ports:
   - "522:22"
 ```
 
+More information on GitLab on docker could be found [here][gitlab-docker1] and
+[here][gitlab-docker2].
+
 [gitlab-ce]: https://docs.gitlab.com/ce/README.html
 [gitlab-usb]: https://blog.sixeyed.com/run-gitlab-on-a-usb-stick-with-docker/
 [gitlab-tags]: https://hub.docker.com/r/gitlab/gitlab-ce/tags/
-
-https://hub.docker.com/r/gitlab/gitlab-ce/
-https://docs.gitlab.com/omnibus/docker/README.html
+[gitlab-docker1]: https://hub.docker.com/r/gitlab/gitlab-ce/
+[gitlab-docker2]: https://docs.gitlab.com/omnibus/docker/README.html
