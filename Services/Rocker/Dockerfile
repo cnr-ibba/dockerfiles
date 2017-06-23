@@ -88,11 +88,6 @@ RUN addgroup --gid 1003 lazzarib && \
     echo 'lazzarib:lazzarib' | chpasswd
 
 # Another user
-RUN addgroup --gid 507 nicolazzie && \
-    adduser nicolazzie --uid 507 --gid 507 --disabled-password --gecos "Ezequiel Luis Nicolazzi" && \
-    echo 'nicolazzie:nicolazzie' | chpasswd
-
-# Another user
 RUN addgroup --gid 505 biscarinif && \
     adduser biscarinif --uid 505 --gid 505 --disabled-password --gecos "Filippo Biscarini" && \
     echo 'biscarinif:biscarinif' | chpasswd
@@ -112,7 +107,9 @@ RUN addgroup --gid 533 masettig && \
 # Add groups and users to groups
 RUN addgroup --gid 1002 ngs && \
     usermod -a -G ngs cozzip && \
-    usermod -a -G ngs giannicor
+    usermod -a -G ngs giannicor && \
+    usermod -a -G ngs lazzarib && \
+    usermod -a -G ngs capreraa
 
 # By default RStudio Server only allows normal (as opposed to system) users to
 # successfully authenticate. The minimum user id is determined by reading the
