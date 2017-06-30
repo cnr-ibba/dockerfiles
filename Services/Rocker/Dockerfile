@@ -1,13 +1,13 @@
 
 #
-# VERSION 0.5
-# DOCKER-VERSION  1.7.1
+# VERSION 0.6
+# DOCKER-VERSION  17.05.0-ce
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    A rocker container with some packages and users added
 # TO_BUILD:       docker build --rm -t ptp/rstudio .
-# CREATE_VOLUME:  docker create --name rstudio_volume ptp/rstudio /bin/true
-# TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ ptp/rstudio
-# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.5
+# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.6
+# CREATE_VOLUME:  docker create --name rstudio_volume ptp/rstudio:0.6 /bin/true
+# TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ ptp/rstudio:0.6
 #
 
 FROM rocker/rstudio
@@ -18,16 +18,17 @@ MAINTAINER Paolo Cozzi <paolo.cozzi@ptp.it>
 # similar to https://registry.hub.docker.com/u/rocker/rstudio/dockerfile/
 RUN rm -rf /var/lib/apt/lists/ && \
     apt-get update && \
-    apt-get install -y -t unstable --no-install-recommends \
+    apt-get install -y \
     libxml2-dev \
     apt-utils \
     apt-file \
-    libmysqlclient-dev \
+    libmariadbclient-dev \
     libpq-dev \
     vim \
     nano \
     libgmp-dev \
-    ghostscript && \
+    ghostscript \
+    debian-ports-archive-keyring && \
     apt-get clean && rm -rf /var/lib/apt/lists/
 
 # Instructions to install java JDK under rstudio image: https://github.com/cardcorp/card-rocker/blob/master/r-java/Dockerfile
@@ -54,7 +55,7 @@ COPY sources.list /etc/apt/sources.list
 
 # add X11 libraries to build rgl package
 RUN apt-get update \
-    && apt-get -y build-dep r-cran-rgl \
+    && apt-get -y build-dep rgl \
     && apt-get clean && rm -rf /var/lib/apt/lists/
 
 # Adding users from PTP (Read GID and UID from NIS server):

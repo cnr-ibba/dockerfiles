@@ -56,7 +56,7 @@ Build a rocker image with a command like this:
 
 ```sh
 $ docker build --rm -t ptp/rstudio .
-$ docker tag ptp/rstudio:latest ptp/rstudio:0.4
+$ docker tag ptp/rstudio:latest ptp/rstudio:0.6
 ```
 
 ## Backup a directory outside container
@@ -78,7 +78,7 @@ if you set an existing directory inside a volume, you can access files outside c
 
 ```sh
 $ docker create --name rstudio_volume \
-   -v /mnt/dell_storage/cloud/docker/rstudio_volume/:/home/ ptp/rstudio:0.4 /bin/true
+   -v /mnt/dell_storage/cloud/docker/rstudio_volume/:/home/ ptp/rstudio:0.6 /bin/true
 ```
 
 Setting volume names facilitates process identification. Next start a new container using this volume. It could be nice also to export host localtime as stated [here](http://stackoverflow.com/questions/22800624/will-docker-container-auto-sync-time-with-the-host-machine)
@@ -86,10 +86,10 @@ Setting volume names facilitates process identification. Next start a new contai
 ```sh
 $ docker run -d -p 8787:8787 --name rstudio --volumes-from rstudio_volume \
    -v /etc/localtime:/etc/localtime:ro -v /mnt/dell_storage/storage/:/storage/ \
-   --cpuset-cpus=0-8 --memory="8G" --restart=always ptp/rstudio:0.4
+   --cpus="4" --memory="8G" --restart=always ptp/rstudio:0.6
 ```
 
-the `-p` options set the standard rstudio port of the container on the host. It can be omitted with the `-P` options, and docker will bind the service on another port. With the `--cpuset-cpus` you can set a CPU interval in which the application can run. Unfortunately at the moment it seems impossible to set CPU dinamically. With the `--memory` option you can set the memory to allocate. You can specify a numeric value with a dimension like M for Mb, G for GB, and so on. More information about docker resource usage can be found [here](https://gist.github.com/afolarin/15d12a476e40c173bf5f).
+the `-p` options set the standard rstudio port of the container on the host. It can be omitted with the `-P` options, and docker will bind the service on another port. With the `--cpus` you can specify how much of the available CPU resources a container can use. With the `--memory` option you can set the memory to allocate. You can specify a numeric value with a dimension like M for Mb, G for GB, and so on. More information about docker resource usage can be found [here](https://gist.github.com/afolarin/15d12a476e40c173bf5f).
 You can inspect the port assigned by docker by using `docker ps` or `docker inspect -f '{{ json .NetworkSettings }}' rstudio | python -mjson.tool`. The first volume exported with the `-v` option is for the HOST localtime (RO mode). The second is the storage partition, which can be modified by each user (under authentication)
 
 If you need to rebuild the image you can re-use the previous rstudio data volumes (if the path exported is the same). Password will be resetted to their default values
