@@ -3,9 +3,9 @@
 # DOCKER-VERSION  1.5.0
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@tecnoparco.org>
 # DESCRIPTION:    A centos 6 image with MySQL
-# TO_BUILD:       docker build --rm -t bunop/centos6-mysql .
-# TO_RUN:         docker run -d -P bunop/centos6-mysql
-# TO_TAG:         docker tag bunop/centos6-mysql:latest bunop/centos6-mysql:0.1
+# TO_BUILD:       docker build --rm -t ptp/centos6-mysql .
+# TO_RUN:         docker run -d -P ptp/centos6-mysql
+# TO_TAG:         docker tag ptp/centos6-mysql:latest ptp/centos6-mysql:0.1
 #
 
 # Start from a centos6 base image

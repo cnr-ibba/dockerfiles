@@ -1,13 +1,13 @@
 
 #
-# VERSION 0.6
+# VERSION 0.7
 # DOCKER-VERSION  17.05.0-ce
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    A rocker container with some packages and users added
 # TO_BUILD:       docker build --rm -t ptp/rstudio .
-# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.6
-# CREATE_VOLUME:  docker create --name rstudio_volume ptp/rstudio:0.6 /bin/true
-# TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ ptp/rstudio:0.6
+# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.7
+# CREATE_VOLUME:  docker create --name rstudio_volume ptp/rstudio:0.7 /bin/true
+# TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ ptp/rstudio:0.7
 #
 
 FROM rocker/rstudio
@@ -28,7 +28,12 @@ RUN rm -rf /var/lib/apt/lists/ && \
     nano \
     libgmp-dev \
     ghostscript \
-    debian-ports-archive-keyring && \
+    debian-ports-archive-keyring \
+    pandoc \
+    texlive-latex-base \
+    texlive-fonts-recommended \
+    texlive-latex-recommended \
+    texlive-latex-extra && \
     apt-get clean && rm -rf /var/lib/apt/lists/
 
 # Instructions to install java JDK under rstudio image: https://github.com/cardcorp/card-rocker/blob/master/r-java/Dockerfile
