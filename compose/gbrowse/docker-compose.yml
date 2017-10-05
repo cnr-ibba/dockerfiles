@@ -1,0 +1,46 @@
+
+version: "3.2"
+
+services:
+
+  gbrowse:
+    build: ./gbrowse
+
+    ports:
+      - "10080:80"
+
+    volumes:
+      - type: volume
+        source: ./gbrowse/conf.d
+        target: /etc/gbrowse2
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+    links:
+      - db
+
+  db:
+    # get the latest mysql server
+    build: ./db
+
+    # Set db environment
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+
+    # export volumes
+    volumes:
+      - type: volume
+        source: ./mysql-data
+        target: /var/lib/mysql
+
+      - type: volume
+        source: ./db/conf.d
+        target: /etc/mysql/conf.d
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true

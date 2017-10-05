@@ -13,6 +13,7 @@ Projects hosted in this repository:
 
 * composetest: `docker-compose` tutorial
 * django: composed image of `django`, `nginx` and `mysql` (or `postgres`)
+* gbrowse: composed image of `mysql` and `gbrowse2`
 * gitlab: `gitlab` Community Edition image
 * mysql: composed image of `mysql`, `nginx` and `php-fpm` serving `phpmyadmin`
 * postgis: composed image of `postgres` with `postgis` plugin
