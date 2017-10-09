@@ -19,8 +19,51 @@ services:
         target: /etc/localtime
         read_only: true
 
+      - type: volume
+        source: gbrowse-data
+        target: /var/lib/gbrowse2/databases
+
     links:
       - db
+      - lb
+
+    networks:
+      - back-tier
+      - front-tier
+
+
+  gbrowse-slave:
+    build: ./gbrowse
+
+    ports:
+      - "8101"
+
+    command: ["/usr/local/bin/start_slave.sh"]
+
+    volumes:
+      - type: volume
+        source: ./gbrowse/conf.d
+        target: /etc/gbrowse2
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: volume
+        source: gbrowse-data
+        target: /var/lib/gbrowse2/databases
+
+      - type: bind
+        source: ./gbrowse/start_slave.sh
+        target: /usr/local/bin/start_slave.sh
+
+    links:
+      - db
+
+    networks:
+      - back-tier
+
 
   db:
     # get the latest mysql server
@@ -44,3 +87,35 @@ services:
         source: /etc/localtime
         target: /etc/localtime
         read_only: true
+
+    networks:
+      - back-tier
+
+
+  lb:
+    image: dockercloud/haproxy:1.6.7
+
+    ports:
+      - 80
+
+    links:
+      - gbrowse-slave
+
+    networks:
+      - front-tier
+      - back-tier
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+
+networks:
+  front-tier:
+    driver: bridge
+
+  back-tier:
+    driver: bridge
+
+
+volumes:
+  gbrowse-data:
