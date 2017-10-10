@@ -20,7 +20,7 @@ services:
         read_only: true
 
       - type: volume
-        source: gbrowse-data
+        source: ./gbrowse-data
         target: /var/lib/gbrowse2/databases
 
     links:
@@ -51,7 +51,7 @@ services:
         read_only: true
 
       - type: volume
-        source: gbrowse-data
+        source: ./gbrowse-data
         target: /var/lib/gbrowse2/databases
 
       - type: bind
@@ -106,7 +106,15 @@ services:
       - back-tier
 
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
 
 
 networks:
@@ -115,7 +123,3 @@ networks:
 
   back-tier:
     driver: bridge
-
-
-volumes:
-  gbrowse-data:

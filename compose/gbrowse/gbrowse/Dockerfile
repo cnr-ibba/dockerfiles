@@ -25,5 +25,8 @@ EXPOSE 443
 # uset entrypoint
 ENTRYPOINT []
 
+# add executable
+COPY apache2-foreground /usr/local/bin
+
 # execute apache in foreground
-CMD ["apachectl", "-DFOREGROUND"]
+CMD ["/usr/local/bin/apache2-foreground"]
