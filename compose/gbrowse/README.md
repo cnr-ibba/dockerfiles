@@ -38,11 +38,34 @@ $ docker-compose up -d
 
 You can accesso gbrowse home page from http://localhost:10080/gbrowse2/
 
-Scale gbrowse-slave services
-----------------------------
+### Scale gbrowse-slave services
 
 To scale up `gbrowse-slave` service, simply type:
 
 ```
 $ docker-compose scale gbrowse-slave=3
 ```
+
+Running tutorial
+----------------
+
+Those are instructions for running volvox database described in [gbrowse admin tutorial][gbrowse-admin-tutorial].
+To enable this database, you need to copy example data files in gbrowse database
+directory. You can do this by running gbrowse container:
+
+```
+$ docker-compose run --no-deps gbrowse /bin/bash
+```
+
+Then you could copy files like this:
+
+```
+$ cd /var/lib/gbrowse2/databases
+$ mkdir volvox
+$ chmod go+rwx volvox
+$ cd /var/www/html/gbrowse2/tutorial/
+$ cp data_files/* /var/lib/gbrowse2/databases/volvox/
+$ cp volvox_final.conf /etc/gbrowse2/volvox.conf
+```
+
+[gbrowse-admin-tutorial]: http://cloud.gmod.org/gbrowse2/tutorial/tutorial.html
