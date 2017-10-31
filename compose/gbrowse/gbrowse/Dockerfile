@@ -137,15 +137,17 @@ RUN cpanm SVG \
 RUN ln -s /usr/local/apache2/bin/httpd /usr/sbin/
 
 # install gbrowse from git
-RUN git clone https://github.com/GMOD/GBrowse ; \
+RUN git clone https://github.com/bunop/GBrowse.git ; \
     cd GBrowse ; \
-    git checkout tags/release-2.56 ; \
-    rm -rf .git ; \
+    git checkout render-issue ; \
     perl Build.PL --cgibin=/usr/local/apache2/cgi-bin/gb2 --htdocs=/usr/local/apache2/htdocs/gbrowse2 \
-        --wwwuser=www-data; \
+        --wwwuser=daemon; \
     yes '' | ./Build test ; \
     yes 'n' | ./Build install ; \
-    chown -R www-data:www-data /var/lib/gbrowse2 ;
+    chown -R daemon:daemon /var/lib/gbrowse2 ; \
+    mv /usr/local/apache2/htdocs/gbrowse2/index.html.new /usr/local/apache2/htdocs/gbrowse2/index.html ; \
+    mkdir -p /var/tmp/gbrowse2/images/ ; \
+    chown -R daemon:daemon /var/tmp/gbrowse2
 
 # configure apache2
 COPY gbrowse2.conf /usr/local/apache2/conf/gbrowse2.conf

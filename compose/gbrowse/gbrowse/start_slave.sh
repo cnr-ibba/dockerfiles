@@ -14,7 +14,7 @@
 #                             and databases to preload
 # --tmp|-T   <path>         Override location of configuration file cache files.
 /usr/local/bin/gbrowse_slave --preload /etc/gbrowse2/slave_preload.conf \
-  --user apache --pid /var/run/gbrowse2.pid --port 8101 --verbose 3 \
+  --user daemon --pid /var/run/gbrowse2.pid --port 8101 --verbose 3 \
   --prefork 1
 
 status=$?
