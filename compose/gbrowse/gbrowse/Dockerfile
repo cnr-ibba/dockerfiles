@@ -94,6 +94,7 @@ RUN git clone https://github.com/bioperl/bioperl-live.git ;\
 # package to deal with cpan
 RUN apt-get update && apt-get install -y \
     cpanminus \
+    sudo \
  && rm -rf /var/lib/apt/lists/*
 
 # install gbrowse and gbrowse data
@@ -124,20 +125,30 @@ RUN cpanm SVG \
     Net::OpenID::Consumer \
     Net::SMTP::SSL
 
-# Download gbrowse from GIT
-RUN cpanm Bio::Graphics ; \
-    git clone https://github.com/GMOD/GBrowse ; \
+# install gbrowse recommeded packages
+# (needs kent library, samtools, etc)
+# RUN cpanm Bio::DB::BigFile \
+#     Bio::DB::Sam \
+#     Bio::Das \
+#     Parse::Apache::ServerStatus \
+#     VM::EC2 is not installed
+
+# create a symlink to httpd executable
+RUN ln -s /usr/local/apache2/bin/httpd /usr/sbin/
+
+# install gbrowse from git
+RUN git clone https://github.com/GMOD/GBrowse ; \
     cd GBrowse ; \
-    git checkout tags/release-2_56 ; \
+    git checkout tags/release-2.56 ; \
     rm -rf .git ; \
-    perl Build.PL ; \
+    perl Build.PL --cgibin=/usr/local/apache2/cgi-bin/gb2 --htdocs=/usr/local/apache2/htdocs/gbrowse2 \
+        --wwwuser=www-data; \
     yes '' | ./Build test ; \
     yes 'n' | ./Build install ; \
-    chown -R apache:apache /var/lib/gbrowse2 ; \
-    cd /usr/share/httpd ; \
-    mkdir -p .config/inkscape .gnome2 ; \
-    chown apache:apache .config/inkscape .gnome2 \
-    cd
+    chown -R www-data:www-data /var/lib/gbrowse2 ;
 
-# Copy apache configuration files
-COPY gbrowse2.conf /etc/httpd/conf.d/gbrowse2.conf
+# configure apache2
+COPY gbrowse2.conf /usr/local/apache2/conf/gbrowse2.conf
+
+# Append gbrowse2 configuration file to httpd.conf
+RUN echo "\n#Gbrowse2 configuration file\nInclude conf/gbrowse2.conf" >> /usr/local/apache2/conf/httpd.conf
