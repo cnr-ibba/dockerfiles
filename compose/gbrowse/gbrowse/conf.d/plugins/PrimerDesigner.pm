@@ -79,8 +79,8 @@ use Bio::Graphics::Browser2::Util;
 use Bio::Graphics::Feature;
 use Bio::Graphics::FeatureFile;
 use CGI qw/:standard escape/;
-use CGI::Pretty 'html3';
-use CGI::Carp 'fatalsToBrowser';
+#use CGI::Pretty 'html3';
+#use CGI::Carp 'fatalsToBrowser';
 use CGI::Toggle;
 use Math::Round 'nearest';
 use Carp qw/cluck/;
@@ -102,8 +102,9 @@ use vars qw/@ISA $PNG $CALL/;
 
 # Arg, modperl
 END {
-	
-  CGI::Delete_all();
+  if ($ENV{'MOD_PERL'}) {
+    CGI::Delete_all();
+  }
 }
 
 

@@ -12,11 +12,11 @@ a brief tutotal with `haproxy` see [How to scale Docker Containers with Docker-C
 Instantiate a gbrowse volume
 ----------------------------
 
-First of all, we need to create a persisten volume for gbrowse data. We can instantiate
+First of all, we need to create a persistent volume for gbrowse data. We can instantiate
 a container and copy data to a volume. Start from the base gbrowse image:
 
 ```
-$ docker run -it --rm --volume "$PWD/gbrowse-data:/data" comics/gbrowse bash
+$ docker-compose run --rm --no-deps --volume "$PWD/gbrowse-data:/data" gbrowse /bin/bash
 ```
 
 Then copy all gbrowse2 database data in `/data` directory. Then exit container:
@@ -25,6 +25,11 @@ Then copy all gbrowse2 database data in `/data` directory. Then exit container:
 $ cp -ra /var/lib/gbrowse2/databases/* /data/
 $ exit
 ```
+
+Create user account database
+----------------------------
+
+
 
 Launch gbrowse with docker-compose
 ----------------------------------
