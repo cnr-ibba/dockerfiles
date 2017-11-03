@@ -26,10 +26,42 @@ $ cp -ra /var/lib/gbrowse2/databases/* /data/
 $ exit
 ```
 
-Create user account database
-----------------------------
+Initialize mysql database
+-------------------------
 
+Start mysql database, then connect to it to initialize a new user. Start database
+in foreground with
 
+```
+$ docker-compose up db
+```
+
+Then, in another terminal, connect to database and initialize tables. MYSQL password
+is the same specified in `docker-compose.yml`:
+
+```
+$ docker-compose run --no-deps --rm db mysql -h db -u root --password=my-secret-pw
+mysql> CREATE DATABASE gbrowse_login ;
+mysql> CREATE USER gbrowse IDENTIFIED BY 'gbrowse' ;
+mysql> GRANT ALL PRIVILEGES ON gbrowse_login.* TO gbrowse@'%' ;
+exit
+```
+
+### Create user account database
+
+Now open a gbrowse session and create login tables with `gbrowse_metadb_config.pl`:
+
+```
+$ docker-compose run --no-deps --rm gbrowse /bin/bash
+# ln -s /etc/gbrowse2/ /etc/GBrowse2
+# gbrowse_metadb_config.pl -admin root:my-secret-pw
+# exit
+```
+
+Then return to MySQL running terminal and shut down database by sending a SIGSTOP
+signal (ex. `CTRL + C`). More info could be found [here][gbrowse-authentication]
+
+[gbrowse-authentication]: http://gmod.org/wiki/GBrowse_Configuration/Authentication#GBrowse_Authentication_via_its_Built-in_User_Account_Database
 
 Launch gbrowse with docker-compose
 ----------------------------------
@@ -59,7 +91,7 @@ To enable this database, you need to copy example data files in gbrowse database
 directory. You can do this by running gbrowse container:
 
 ```
-$ docker-compose run --no-deps gbrowse /bin/bash
+$ docker-compose run --no-deps --rm gbrowse /bin/bash
 ```
 
 Then you could copy files like this:
@@ -68,9 +100,9 @@ Then you could copy files like this:
 $ cd /var/lib/gbrowse2/databases
 $ mkdir volvox
 $ chmod go+rwx volvox
-$ cd /var/www/html/gbrowse2/tutorial/
+$ cd /usr/local/apache2/htdocs/gbrowse2/tutorial/
 $ cp data_files/* /var/lib/gbrowse2/databases/volvox/
-$ cp volvox_final.conf /etc/gbrowse2/volvox.conf
+$ cp conf_files/volvox_final.conf /etc/gbrowse2/volvox.conf
 ```
 
 [gbrowse-admin-tutorial]: http://cloud.gmod.org/gbrowse2/tutorial/tutorial.html

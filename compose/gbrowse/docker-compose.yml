@@ -9,6 +9,10 @@ services:
     ports:
       - "10080:80"
 
+    # Set db environment
+    environment:
+      GBROWSE_CONF: /etc/gbrowse2
+
     volumes:
       - type: volume
         source: ./gbrowse/conf.d
