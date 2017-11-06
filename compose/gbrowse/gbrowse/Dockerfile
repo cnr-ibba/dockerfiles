@@ -76,6 +76,7 @@ RUN apt-get update && apt-get install -y \
     libnet-smtp-ssl-perl \
     libauthen-sasl-perl \
     libcrypt-ssleay-perl \
+    libtest-most-perl \
   && rm -rf /var/lib/apt/lists/*
 
 # set working directory
@@ -83,18 +84,21 @@ WORKDIR /root
 
 # Packaged versions of BioPerl contain a bug that prevents GBrowse from displaying
 # DNA sequences from in-memory databases. Install Bioperl from source code this way:
-RUN git clone https://github.com/bioperl/bioperl-live.git ;\
-    cd bioperl-live ; \
-    rm -rf .git ; \
-    yes '' | perl Build.PL ; \
-    ./Build test  ; \
-    ./Build install ; \
+RUN git clone https://github.com/bioperl/bioperl-live.git && \
+    cd bioperl-live && \
+    rm -rf .git && \
+    yes '' | perl Build.PL && \
+    ./Build test  && \
+    ./Build install && \
     cd
 
 # package to deal with cpan
 RUN apt-get update && apt-get install -y \
     cpanminus \
     sudo \
+    unzip \
+    libncurses-dev \
+    libbz2-dev \
  && rm -rf /var/lib/apt/lists/*
 
 # install gbrowse and gbrowse data
@@ -125,29 +129,47 @@ RUN cpanm SVG \
     Net::OpenID::Consumer \
     Net::SMTP::SSL
 
-# install gbrowse recommeded packages
-# (needs kent library, samtools, etc)
-# RUN cpanm Bio::DB::BigFile \
-#     Bio::DB::Sam \
-#     Bio::Das \
-#     Parse::Apache::ServerStatus \
-#     VM::EC2 is not installed
-
 # create a symlink to httpd executable
 RUN ln -s /usr/local/apache2/bin/httpd /usr/sbin/
 
 # install gbrowse from git
-RUN git clone https://github.com/bunop/GBrowse.git ; \
-    cd GBrowse ; \
-    git checkout render-issue ; \
+RUN git clone https://github.com/bunop/GBrowse.git && \
+    cd GBrowse && \
+    git checkout render-issue && \
     perl Build.PL --cgibin=/usr/local/apache2/cgi-bin/gb2 --htdocs=/usr/local/apache2/htdocs/gbrowse2 \
-        --wwwuser=daemon; \
-    yes '' | ./Build test ; \
-    yes 'n' | ./Build install ; \
-    chown -R daemon:daemon /var/lib/gbrowse2 ; \
-    mv /usr/local/apache2/htdocs/gbrowse2/index.html.new /usr/local/apache2/htdocs/gbrowse2/index.html ; \
-    mkdir -p /var/tmp/gbrowse2/images/ ; \
+        --wwwuser=daemon && \
+    yes '' | ./Build test && \
+    yes 'n' | ./Build install && \
+    chown -R daemon:daemon /var/lib/gbrowse2 && \
+    mv /usr/local/apache2/htdocs/gbrowse2/index.html.new /usr/local/apache2/htdocs/gbrowse2/index.html && \
+    mkdir -p /var/tmp/gbrowse2/images/ && \
     chown -R daemon:daemon /var/tmp/gbrowse2
+
+# define variales
+ENV WORKDIR=/root MACHTYPE=x86_64 KENT_SRC=/root/userApps/kent/src CFLAGS='-fPIC' SAMTOOLS=/root/samtools-0.1.19
+
+# install kent libraries
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/userApps.archive/userApps.v334.src.tgz && \
+    tar -xvzf userApps.v334.src.tgz && \
+    cd /root/userApps/kent/src/lib && \
+    make -j $(nproc) && \
+    cd $WORKDIR
+
+# install samtools
+RUN wget https://downloads.sourceforge.net/project/samtools/samtools/0.1.19/samtools-0.1.19.tar.bz2 && \
+    tar -xvjf samtools-0.1.19.tar.bz2 && \
+    cd samtools-0.1.19 && \
+    sed -i 's/CFLAGS=\t\t/CFLAGS= -fPIC /' Makefile && \
+    make -j $(nproc) && \
+    cd $WORKDIR
+
+# install gbrowse recommeded packages
+# (needs kent library, samtools, etc)
+RUN cpanm Bio::DB::BigFile \
+    Bio::DB::Sam \
+    Bio::Das \
+    Parse::Apache::ServerStatus \
+    VM::EC2
 
 # configure apache2
 COPY gbrowse2.conf /usr/local/apache2/conf/gbrowse2.conf
