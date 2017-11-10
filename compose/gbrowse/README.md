@@ -26,40 +26,18 @@ $ cp -ra /var/lib/gbrowse2/databases/* /data/
 $ exit
 ```
 
-Initialize mysql database
--------------------------
-
-Start mysql database, then connect to it to initialize a new user. Start database
-in foreground with
-
-```
-$ docker-compose up db
-```
-
-Then, in another terminal, connect to database and initialize tables. MYSQL password
-is the same specified in `docker-compose.yml`:
-
-```
-$ docker-compose run --no-deps --rm db mysql -h db -u root --password=my-secret-pw
-mysql> CREATE DATABASE gbrowse_login ;
-mysql> CREATE USER gbrowse IDENTIFIED BY 'gbrowse' ;
-mysql> GRANT ALL PRIVILEGES ON gbrowse_login.* TO gbrowse@'%' ;
-exit
-```
-
-### Create user account database
+Create user account database
+----------------------------
 
 Now open a gbrowse session and create login tables with `gbrowse_metadb_config.pl`:
 
 ```
 $ docker-compose run --no-deps --rm gbrowse /bin/bash
-# ln -s /etc/gbrowse2/ /etc/GBrowse2
-# gbrowse_metadb_config.pl -admin root:my-secret-pw
+# gbrowse_metadb_config.pl
 # exit
 ```
 
-Then return to MySQL running terminal and shut down database by sending a SIGSTOP
-signal (ex. `CTRL + C`). More info could be found [here][gbrowse-authentication]
+More info could be found [here][gbrowse-authentication]
 
 [gbrowse-authentication]: http://gmod.org/wiki/GBrowse_Configuration/Authentication#GBrowse_Authentication_via_its_Built-in_User_Account_Database
 
@@ -103,6 +81,8 @@ $ chmod go+rwx volvox
 $ cd /usr/local/apache2/htdocs/gbrowse2/tutorial/
 $ cp data_files/* /var/lib/gbrowse2/databases/volvox/
 $ cp conf_files/volvox_final.conf /etc/gbrowse2/volvox.conf
+$ cd /var/lib/gbrowse2/databases
+$ chown -R daemon.daemon volvox
 ```
 
 [gbrowse-admin-tutorial]: http://cloud.gmod.org/gbrowse2/tutorial/tutorial.html
