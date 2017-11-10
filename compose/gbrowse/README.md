@@ -16,7 +16,7 @@ First of all, we need to create a persistent volume for gbrowse data. We can ins
 a container and copy data to a volume. Start from the base gbrowse image:
 
 ```
-$ docker-compose run --rm --no-deps --volume "$PWD/gbrowse-data:/data" gbrowse /bin/bash
+$ docker run -ti --volume "$PWD/gbrowse-data:/data" gbrowse_gbrowse /bin/bash
 ```
 
 Then copy all gbrowse2 database data in `/data` directory. Then exit container:
@@ -40,6 +40,27 @@ $ docker-compose run --no-deps --rm gbrowse /bin/bash
 More info could be found [here][gbrowse-authentication]
 
 [gbrowse-authentication]: http://gmod.org/wiki/GBrowse_Configuration/Authentication#GBrowse_Authentication_via_its_Built-in_User_Account_Database
+
+## Restrict gbrowse to valid users
+
+Launch a gbrowse instance ad create a new user with the following command:
+
+```
+$ docker-compose run --no-deps --rm gbrowse /bin/bash
+# gbrowse_create_account.pl -pass test -fullname test test
+# exit
+```
+
+Then add this to `GENERAL` gbrowse configuration file:
+
+```
+# Restrict access to registered user
+restrict = require valid-user
+```
+
+More info on authentication could be found [here][gbrowse-add-user]
+
+[gbrowse-add-user]: http://gmod.org/wiki/GBrowse_Configuration/Authentication#Adding_User_Accounts
 
 Launch gbrowse with docker-compose
 ----------------------------------
@@ -77,12 +98,11 @@ Then you could copy files like this:
 ```
 $ cd /var/lib/gbrowse2/databases
 $ mkdir volvox
-$ chmod go+rwx volvox
-$ cd /usr/local/apache2/htdocs/gbrowse2/tutorial/
+$ cd /var/www/html/gbrowse2/tutorial/
 $ cp data_files/* /var/lib/gbrowse2/databases/volvox/
 $ cp conf_files/volvox_final.conf /etc/gbrowse2/volvox.conf
 $ cd /var/lib/gbrowse2/databases
-$ chown -R daemon.daemon volvox
+$ chown -R www-data.www-data volvox
 ```
 
 [gbrowse-admin-tutorial]: http://cloud.gmod.org/gbrowse2/tutorial/tutorial.html

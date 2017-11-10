@@ -1,18 +1,28 @@
 
 #
-# VERSION 0.2
+# VERSION 0.3
 # DOCKER-VERSION  17.05.0-ce
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    A http container to work with gbrowse
 # TO_BUILD:       docker build --rm -t gbrowse_gbrowse .
 # TO_RUN:         docker run -d -P gbrowse_gbrowse
-# TO_TAG:         docker tag gbrowse_gbrowse:latest gbrowse_gbrowse:0.2
+# TO_TAG:         docker tag gbrowse_gbrowse:latest gbrowse_gbrowse:0.3
 #
 
 # Get the latest gbrowse image
-FROM httpd:2.2
+FROM debian:jessie
 
 MAINTAINER Paolo Cozzi <paolo.cozzi@ptp.it>
+
+# install apache2 and mods
+RUN apt-get update && apt-get install -y \
+    apache2 \
+    libapache2-mod-fcgid \
+  && rm -rf /var/lib/apt/lists/*
+
+# overwrite log files (https://serverfault.com/a/711172)
+RUN ln -sf /proc/self/fd/1 /var/log/apache2/access.log && \
+    ln -sf /proc/self/fd/2 /var/log/apache2/error.log
 
 # Utilities to help with fetching components distributed in source code
 RUN apt-get update && apt-get install -y \
@@ -129,21 +139,17 @@ RUN cpanm SVG \
     Net::OpenID::Consumer \
     Net::SMTP::SSL
 
-# create a symlink to httpd executable
-RUN ln -s /usr/local/apache2/bin/httpd /usr/sbin/
-
 # install gbrowse from git
 RUN git clone https://github.com/bunop/GBrowse.git && \
     cd GBrowse && \
     git checkout render-issue && \
-    perl Build.PL --cgibin=/usr/local/apache2/cgi-bin/gb2 --htdocs=/usr/local/apache2/htdocs/gbrowse2 \
-        --wwwuser=daemon && \
+    perl Build.PL --cgibin=/usr/lib/cgi-bin/gb2 --htdocs=/var/www/html/gbrowse2 \
+        --wwwuser=www-data && \
     yes '' | ./Build test && \
     yes 'n' | ./Build install && \
-    chown -R daemon:daemon /var/lib/gbrowse2 && \
-    mv /usr/local/apache2/htdocs/gbrowse2/index.html.new /usr/local/apache2/htdocs/gbrowse2/index.html && \
+    chown -R www-data:www-data /var/lib/gbrowse2 && \
     mkdir -p /var/tmp/gbrowse2/images/ && \
-    chown -R daemon:daemon /var/tmp/gbrowse2
+    chown -R www-data:www-data /var/tmp/gbrowse2
 
 # define variales
 ENV WORKDIR=/root MACHTYPE=x86_64 KENT_SRC=/root/userApps/kent/src CFLAGS='-fPIC' SAMTOOLS=/root/samtools-0.1.19
@@ -172,7 +178,20 @@ RUN cpanm Bio::DB::BigFile \
     VM::EC2
 
 # configure apache2
-COPY gbrowse2.conf /usr/local/apache2/conf/gbrowse2.conf
+COPY gbrowse2.conf /etc/apache2/conf-available/gbrowse2.conf
 
-# Append gbrowse2 configuration file to httpd.conf
-RUN echo "\n#Gbrowse2 configuration file\nInclude conf/gbrowse2.conf" >> /usr/local/apache2/conf/httpd.conf
+# enable configuration file
+RUN a2enconf gbrowse2
+
+# add executable
+COPY apache2-foreground /usr/local/bin
+
+# expose ports
+EXPOSE 80
+EXPOSE 443
+
+# add this symlink to work with gbrowse scripts
+RUN ln -s /etc/gbrowse2/ /etc/GBrowse2
+
+# execute apache in foreground
+CMD ["/usr/local/bin/apache2-foreground"]
