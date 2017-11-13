@@ -27,7 +27,8 @@ services:
         source: ./gbrowse-data
         target: /var/lib/gbrowse2/databases
 
-      - type: tmpfs
+      - type: bind
+        source: gbrowse-cache
         target: /var/tmp/gbrowse2
 
     links:
@@ -65,7 +66,8 @@ services:
         source: ./gbrowse/start_slave.sh
         target: /usr/local/bin/start_slave.sh
 
-      - type: tmpfs
+      - type: bind
+        source: gbrowse-cache
         target: /var/tmp/gbrowse2
 
     links:
@@ -133,3 +135,7 @@ networks:
 
   back-tier:
     driver: bridge
+
+
+volumes:
+  gbrowse-cache:

@@ -9,6 +9,18 @@ a brief tutotal with `haproxy` see [How to scale Docker Containers with Docker-C
 
 [scale-tutorial]: https://www.brianchristner.io/how-to-scale-a-docker-container-with-docker-compose/
 
+Before start
+============
+
+Build images
+------------
+
+Build images to instantiate containers:
+
+```
+$ docker-compose build
+```
+
 Instantiate a gbrowse volume
 ----------------------------
 
@@ -16,7 +28,7 @@ First of all, we need to create a persistent volume for gbrowse data. We can ins
 a container and copy data to a volume. Start from the base gbrowse image:
 
 ```
-$ docker run -ti --volume "$PWD/gbrowse-data:/data" gbrowse_gbrowse /bin/bash
+$ docker run -ti --rm --volume "$PWD/gbrowse-data:/data" gbrowse_gbrowse /bin/bash
 ```
 
 Then copy all gbrowse2 database data in `/data` directory. Then exit container:
@@ -100,7 +112,6 @@ $ cd /var/lib/gbrowse2/databases
 $ mkdir volvox
 $ cd /var/www/html/gbrowse2/tutorial/
 $ cp data_files/* /var/lib/gbrowse2/databases/volvox/
-$ cp conf_files/volvox_final.conf /etc/gbrowse2/volvox.conf
 $ cd /var/lib/gbrowse2/databases
 $ chown -R www-data.www-data volvox
 ```
