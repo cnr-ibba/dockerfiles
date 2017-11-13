@@ -35,6 +35,7 @@ Then copy all gbrowse2 database data in `/data` directory. Then exit container:
 
 ```
 $ cp -ra /var/lib/gbrowse2/databases/* /data/
+$ chown www-data.www-data /data/
 $ exit
 ```
 
@@ -111,7 +112,7 @@ Then you could copy files like this:
 $ cd /var/lib/gbrowse2/databases
 $ mkdir volvox
 $ cd /var/www/html/gbrowse2/tutorial/
-$ cp data_files/* /var/lib/gbrowse2/databases/volvox/
+$ cp -ra data_files/* /var/lib/gbrowse2/databases/volvox/
 $ cd /var/lib/gbrowse2/databases
 $ chown -R www-data.www-data volvox
 ```

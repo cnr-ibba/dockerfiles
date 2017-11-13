@@ -77,6 +77,30 @@ services:
       - back-tier
 
 
+  supercronic:
+    build: ./gbrowse
+
+    command: ["supercronic", "/etc/cron.d/gbrowse-clean"]
+
+    volumes:
+      - type: volume
+        source: ./gbrowse/conf.d
+        target: /etc/gbrowse2
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: volume
+        source: ./gbrowse-data
+        target: /var/lib/gbrowse2/databases
+
+      - type: bind
+        source: gbrowse-cache
+        target: /var/tmp/gbrowse2
+
+
   db:
     # get the latest mysql server
     build: ./db

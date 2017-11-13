@@ -193,5 +193,23 @@ EXPOSE 443
 # add this symlink to work with gbrowse scripts
 RUN ln -s /etc/gbrowse2/ /etc/GBrowse2
 
+# install curl
+RUN apt-get update && apt-get install -y \
+    curl \
+ && rm -rf /var/lib/apt/lists/*
+
+# install supercronic (https://github.com/aptible/supercronic/)
+ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.1.4/supercronic-linux-amd64 \
+    SUPERCRONIC=supercronic-linux-amd64 \
+    SUPERCRONIC_SHA1SUM=3a631023f9f9dd155cfa0d1bb517a063d375055a
+
+RUN curl -fsSLO "$SUPERCRONIC_URL" \
+ && echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - \
+ && chmod +x "$SUPERCRONIC" \
+ && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
+ && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
+
+COPY gbrowse-clean /etc/cron.d/gbrowse-clean
+
 # execute apache in foreground
 CMD ["/usr/local/bin/apache2-foreground"]
