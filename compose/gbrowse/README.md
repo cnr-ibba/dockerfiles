@@ -118,3 +118,38 @@ $ chown -R www-data.www-data volvox
 ```
 
 [gbrowse-admin-tutorial]: http://cloud.gmod.org/gbrowse2/tutorial/tutorial.html
+
+Configuring gbrowse_syn
+-----------------------
+
+### Create a MySQL database
+
+Connect to a MySQL instance and create `rice_synteny` database:
+
+```
+$ docker-compose run --no-deps --rm db mysql -h db -u root --password=my-secret-pw
+mysql> CREATE USER gbrowsero IDENTIFIED BY 'gbrowseropass' ;
+mysql> CREATE DATABASE rice_synteny ;
+mysql> GRANT SELECT ON rice_synteny.* TO gbrowsero@'%';
+mysql> exit
+```
+
+### Load alignment into database
+
+Launch a gbrowse container:
+
+```
+$ docker-compose run --no-deps --rm gbrowse /bin/bash
+$ cd /var/lib/gbrowse2/databases/gbrowse_syn/alignments
+$ gzip -d rice.aln.gz
+$ zcat rice.aln.gz perl | /usr/local/bin/gbrowse_syn_load_alignments_msa.pl -u root -p my-secret-pw --dsn='dbi:mysql:database=rice_synteny;host=db' -f clustalw -v -c -
+```
+
+Then reach `gbrowse_syn` from this [link][local-gbrowse_syn]. More information on
+`gbrowse_syn` could be found [here][gbrowse_syn] and [here][gbrowse_syn_help]. More information on loading alignments
+and `gbrowse_syn` scripts in general could be found [here][gbrowse_syn-script]
+
+[local-gbrowse_syn]: http://localhost:10080/gb2/gbrowse_syn/
+[gbrowse_syn]: http://gmod.org/wiki/GBrowse_syn
+[gbrowse_syn_help]: http://gmod.org/wiki/GBrowse_syn_Help
+[gbrowse_syn-script]: http://gmod.org/wiki/GBrowse_syn_Script
