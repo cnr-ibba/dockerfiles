@@ -31,6 +31,10 @@ services:
         source: gbrowse-cache
         target: /var/tmp/gbrowse2
 
+      - type: bind
+        source: ./gbrowse/gbrowse2.conf
+        target: /etc/apache2/conf-available/gbrowse2.conf
+
     links:
       - db
       - lb

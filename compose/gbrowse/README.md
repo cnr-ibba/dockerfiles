@@ -142,7 +142,8 @@ Launch a gbrowse container:
 $ docker-compose run --no-deps --rm gbrowse /bin/bash
 $ cd /var/lib/gbrowse2/databases/gbrowse_syn/alignments
 $ gzip -d rice.aln.gz
-$ zcat rice.aln.gz perl | /usr/local/bin/gbrowse_syn_load_alignments_msa.pl -u root -p my-secret-pw --dsn='dbi:mysql:database=rice_synteny;host=db' -f clustalw -v -c -
+$ /usr/local/bin/gbrowse_syn_load_alignments_msa.pl -u root -p my-secret-pw --dsn='dbi:mysql:database=rice_synteny;host=db' -f clustalw -v -c rice.aln
+$ gzip --best rice.aln
 ```
 
 Then reach `gbrowse_syn` from this [link][local-gbrowse_syn]. More information on
