@@ -331,6 +331,32 @@ Pull it back
 $ docker pull registry.ptp/myfirstimage
 ```
 
+Using docker-registry
+---------------------
+
+### Listing images
+
+List all images in catalog (using httpie):
+
+```
+$ http https://<user>:<password>@registry.ptp/v2/_catalog
+```
+
+Getting all version for an image:
+
+```
+$ http  https://<user>:<password>@registry.ptp/v2/<image>/tags/list
+```
+
+### Deleting images using delete-docker-registry-image
+
+Deleting an image using the latest version of [delete-docker-registry-image](delete-docker-registry-image):
+
+```
+$ sudo ./delete_docker_registry_image.py --image <image>:latest
+$ sudo ./delete_docker_registry_image.py --image <image>:<tag>
+```
+
 <!-- References -->
 
 [docker-registry]: https://docs.docker.com/registry/
@@ -341,5 +367,6 @@ $ docker pull registry.ptp/myfirstimage
 [private-docker-registry-configuration]: http://blog.agilepartner.net/private-docker-registry-configuration/
 [supervisor-and-nginx]: https://www.kf-interactive.com/blog/roll-your-own-docker-registry-with-docker-compose-supervisor-and-nginx/
 [nginx-proxy-examples]: https://github.com/kwk/docker-registry-frontend/wiki/nginx-proxy-examples
+[delete-docker-registry-image]: https://github.com/burnettk/delete-docker-registry-image.git
 
 <!-- Not used: http://blog.agilepartner.net/private-docker-registry-behind-an-httpd-reverse-proxy/ -->

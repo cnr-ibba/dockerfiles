@@ -1,11 +1,11 @@
 #
-# VERSION 0.1
-# DOCKER-VERSION  1.7.1
+# VERSION 0.2
+# DOCKER-VERSION  17.05.0-ce
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    A shiny container based on rocker-shiny
 # TO_BUILD:       docker build --rm -t ptp/shiny .
 # TO_RUN:         docker run -d -P ptp/shiny
-# TO_TAG:         docker tag ptp/shiny:latest <name>:0.1
+# TO_TAG:         docker tag ptp/shiny:latest <name>:0.2
 #
 
 # Get the last rocker/shiny image
@@ -17,7 +17,9 @@ MAINTAINER Paolo Cozzi <paolo.cozzi@ptp.it>
 # install package dependencies
 RUN apt-get update && apt-get install -y \
     libssl-dev \
-    libxml2-dev
+    libxml2-dev \
+    openjdk-9-jdk \
+ && apt-get clean && rm -rf /var/lib/apt/lists/
 
 # Install R packages. Packages are listed in packages.txt
 COPY install.r packages.txt /root/

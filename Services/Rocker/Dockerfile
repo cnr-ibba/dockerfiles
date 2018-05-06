@@ -1,13 +1,13 @@
 
 #
-# VERSION 0.7
+# VERSION 0.8
 # DOCKER-VERSION  17.05.0-ce
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
 # DESCRIPTION:    A rocker container with some packages and users added
 # TO_BUILD:       docker build --rm -t ptp/rstudio .
-# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.7
-# CREATE_VOLUME:  docker create --name rstudio_volume ptp/rstudio:0.7 /bin/true
-# TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ ptp/rstudio:0.7
+# TO_TAG:         docker tag ptp/rstudio:latest ptp/rstudio:0.8
+# CREATE_VOLUME:  docker create --name rstudio_volume ptp/rstudio:0.8 /bin/true
+# TO_RUN:         docker run -d -p 8787:8787 -P --name rstudio --volumes-from rstudio_volume -v /etc/localtime:/etc/localtime:ro -v /mnt/storage/:/storage/ ptp/rstudio:0.8
 #
 
 FROM rocker/rstudio
@@ -34,23 +34,8 @@ RUN rm -rf /var/lib/apt/lists/ && \
     texlive-fonts-recommended \
     texlive-latex-recommended \
     texlive-latex-extra && \
+    openjdk-9-jdk && \
     apt-get clean && rm -rf /var/lib/apt/lists/
-
-# Instructions to install java JDK under rstudio image: https://github.com/cardcorp/card-rocker/blob/master/r-java/Dockerfile
-RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" \
-      | tee /etc/apt/sources.list.d/webupd8team-java.list \
-    &&  echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" \
-      | tee -a /etc/apt/sources.list.d/webupd8team-java.list \
-    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886 \
-    && echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" \
-        | /usr/bin/debconf-set-selections \
-    && apt-get update \
-    && apt-get install -y oracle-java8-installer \
-    && update-alternatives --display java \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean \
-    && R CMD javareconf \
-    && apt-get clean && rm -rf /var/lib/apt/lists/
 
 # Runnig rstudio instance need to be restarted (rstudio-server restart). There are no problems when building
 # a new rstudio image
@@ -99,11 +84,6 @@ RUN addgroup --gid 505 biscarinif && \
     echo 'biscarinif:biscarinif' | chpasswd
 
 # Another user
-RUN addgroup --gid 517 capreraa && \
-    adduser capreraa --uid 517 --gid 517 --disabled-password --gecos "Andrea Caprera" && \
-    echo 'capreraa:capreraa' | chpasswd
-
-# Another user
 RUN addgroup --gid 533 masettig && \
     adduser masettig --uid 533 --gid 533 --disabled-password --gecos "Giulia Masetti" && \
     echo 'masettig:masettig' | chpasswd
@@ -115,7 +95,7 @@ RUN addgroup --gid 1002 ngs && \
     usermod -a -G ngs cozzip && \
     usermod -a -G ngs giannicor && \
     usermod -a -G ngs lazzarib && \
-    usermod -a -G ngs capreraa
+    usermod -a -G ngs biscarinif
 
 # By default RStudio Server only allows normal (as opposed to system) users to
 # successfully authenticate. The minimum user id is determined by reading the
