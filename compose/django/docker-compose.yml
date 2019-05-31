@@ -18,7 +18,7 @@ services:
 
 
   # # a variant of db image using postgresql Database
-  # pg:
+  # db:
   #   # get the latest postgres server
   #   image: postgres:9.6
   #
@@ -54,7 +54,6 @@ services:
     # link container to database
     links:
       - db
-      - pg
 
 
   nginx:
