@@ -1,18 +1,19 @@
 
 #
-# VERSION 0.5
-# DOCKER-VERSION  1.9.1
-# AUTHOR:         Paolo Cozzi <paolo.cozzi@ptp.it>
-# DESCRIPTION:    A django container working on LTS django 1.11 on python 3
+# VERSION 0.6
+# DOCKER-VERSION  17.05.0-ce
+# AUTHOR:         Paolo Cozzi <paolo.cozzi@ibba.cnr.it>
+# DESCRIPTION:    A django container working on LTS django 2.2 on python 3
 # TO_BUILD:       docker build --rm -t django_uwsgi .
 # TO_RUN:         docker run -d -P django_uwsgi
-# TO_TAG:         docker tag django_uwsgi:latest django_uwsgi:0.5
+# TO_TAG:         docker tag django_uwsgi:latest django_uwsgi:0.6
 #
 
 # The official django image is deprecated in favor of the standard python image
-FROM python:3.6
+FROM python:3.7
 
-MAINTAINER Paolo Cozzi <paolo.cozzi@ptp.it>
+# MAINTAINER is deprecated. Use LABEL instead
+LABEL maintainer="paolo.cozzi@ibba.cnr.it"
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \

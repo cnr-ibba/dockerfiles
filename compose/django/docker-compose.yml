@@ -1,70 +1,82 @@
 
-db:
-  # get the latest mysql server
-  image: mysql:5.6
+version: "3.2"
+services:
+  # Create a composed Django-Postgres-NGINX instance
+  db:
+    # get the latest mysql server
+    image: mariadb:10.1
 
-  # Set db environment
-  environment:
-    MYSQL_ROOT_PASSWORD: my-secret-pw
+    # Set db environment
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
 
-  # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
-  volumes:
-    - "./mysql-data:/var/lib/mysql"
-    - "/etc/localtime:/etc/localtime:ro"
-
-
-# a variant of db image using postgresql Database
-# db:
-#   # get the latest postgres server
-#   image: postgres:9.6
-#
-#   # Set db environment
-#   environment:
-#     POSTGRES_PASSWORD: my-secret-pw
-#
-#   # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
-#   volumes:
-#     - "./postgres-data:/var/lib/postgresql/data"
-#     - "/etc/localtime:/etc/localtime:ro"
+    # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
+    volumes:
+      - type: bind
+        source: ./mysql-data/
+        target: /var/lib/mysql
 
 
-uwsgi:
-  # a custom image for django
-  build: ./uwsgi
-
-  # exec a different command from image
-  command: uwsgi --ini /var/uwsgi/mysite_uwsgi.ini
-
-  # set working dir for uwsgi
-  working_dir: /var/uwsgi/
-
-  # define volumes
-  volumes:
-    - "./django-data/:/var/uwsgi/"
-    - "/etc/localtime:/etc/localtime:ro"
-
-  # Expose the default port
-
-  # link container to database
-  links:
-    - db
+  # # a variant of db image using postgresql Database
+  # pg:
+  #   # get the latest postgres server
+  #   image: postgres:9.6
+  #
+  #   # Set db environment
+  #   environment:
+  #     POSTGRES_PASSWORD: my-secret-pw
+  #
+  #   # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
+  #   volumes:
+  #     - type: bind
+  #       source: ./postgres-data/
+  #       target: /var/lib/postgresql/data
 
 
-nginx:
-  # a custom image for NGINX
-  build: ./nginx
+  uwsgi:
+    # a custom image for django
+    build: ./uwsgi
 
-  volumes:
-    - "/etc/localtime:/etc/localtime:ro"
-    - "./nginx/conf.d/:/etc/nginx/conf.d/"
+    # exec a different command from image
+    command: uwsgi --ini /var/uwsgi/mysite_uwsgi.ini
 
-  # get volumes from uwsgi
-  volumes_from:
-    - uwsgi
+    # set working dir for uwsgi
+    working_dir: /var/uwsgi/
 
-  ports:
-    - "10080:80"
+    # define volumes
+    volumes:
+      - type: bind
+        source: ./django-data/
+        target: /var/uwsgi/
 
-  # link container uwsgi
-  links:
-    - uwsgi
+    # Expose the default port
+
+    # link container to database
+    links:
+      - db
+      - pg
+
+
+  nginx:
+    # a custom image for NGINX
+    build: ./nginx
+
+    volumes:
+      - type: bind
+        source: ./nginx/conf.d/
+        target: /etc/nginx/conf.d/
+
+      - type: bind
+        source: ./django-data/
+        target: /var/uwsgi/
+
+    ports:
+      - "10080:80"
+
+    # link container uwsgi
+    links:
+      - uwsgi
+
+
+networks:
+  default:
