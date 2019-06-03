@@ -8,7 +8,10 @@ services:
 
     # Set db environment
     environment:
-      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
     # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
     volumes:
@@ -36,6 +39,13 @@ services:
   uwsgi:
     # a custom image for django
     build: ./uwsgi
+
+    # Set db environment
+    environment:
+      MYSITE_DATABASE: ${MYSQL_DATABASE}
+      MYSITE_USER: ${MYSQL_USER}
+      MYSITE_PASSWORD: ${MYSQL_PASSWORD}
+      DEBUG: ${DEBUG}
 
     # exec a different command from image
     command: uwsgi --ini /var/uwsgi/mysite_uwsgi.ini
