@@ -1,5 +1,5 @@
 uwsgi
 mysqlclient
 psycopg2
-Django==2.2.1
+django>=2.2.4
 python-decouple

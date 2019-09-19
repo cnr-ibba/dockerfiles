@@ -18,7 +18,7 @@ LABEL maintainer="paolo.cozzi@ibba.cnr.it"
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
-    mysql-client \
+    default-mysql-client \
     sqlite3 && \
     apt-get clean && \
     apt-get autoclean && \
