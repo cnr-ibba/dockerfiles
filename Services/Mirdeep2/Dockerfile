@@ -10,21 +10,34 @@
 #
 
 # FROM <image>[:<tag>|@<digest]
-FROM perl:5.32
+FROM buildpack-deps:buster
 
 # MAINTAINER is deprecated. Use LABEL instead
 LABEL maintainer="paolo.cozzi@ibba.cnr.it"
 
+# upgrade and install perl
+RUN apt-get update && \
+    apt-get install -y \
+    perl \
+    cpanminus && \
+    apt-get clean && rm -rf /var/lib/apt/lists/
+
 # Install mirdeep2 requirements
-RUN cpanm https://cpan.metacpan.org/authors/id/S/SS/SSIMMS/PDF-API2-2.029.tar.gz
+RUN cpanm PDF::API2
 
 # download mirdeep2 using git
 RUN git clone https://github.com/rajewsky-lab/mirdeep2 /opt/mirdeep2/
 
 WORKDIR /opt/mirdeep2/
 
+# create mirdeep2 bin directory (using install)
+RUN perl install.pl
+
 # Exporting variables
 ENV PATH="/opt/mirdeep2/bin:${PATH}"
+ENV PERL_MB_OPT="--install_base /root/perl5"
+ENV PERL_MM_OPT="INSTALL_BASE=/root/perl5"
+ENV PERL5LIB="/opt/mirdeep2/lib/perl5"
 
-# create mirdeep2 bin directory (using install) and install stuff
-RUN perl install.pl && perl install.pl
+# install stuff
+RUN perl install.pl
