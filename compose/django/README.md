@@ -1,6 +1,5 @@
 
-Running Django+MySQL-uwsgi with docker-compose
-==============================================
+# Running Django+MySQL-uwsgi with docker-compose
 
 This guide describe how to build a running Django+MySQL running with docker-compose. First of all copy all this directory in another location since you will modify something to develop your application. Next, rename the whole directory with a project name. In this example, all names are set to `mysite`. Replace all `mysite` occurences with your project name. All docker container instances will have such name as a prefix in their name. There are some directory that will be mounted as data volume: this will make easier to develop the code or re-spawn the docker application on another location using the same volume directory (as it would be for mysql-data directory). For this model, al MySQL data file will be placed in `mysql-data` directory inside this project; All django data will be placed in `django-data` directory inside this project. When such directories are created for the first time, there are created and mounted as a root directories. After permission can be fixed according user need. However processes like `nginx` and `uswgi` work with a different user from root, and so files have to be accessed in read mode
 
@@ -25,7 +24,7 @@ tracked using *CVS*
 
 Create a `.env` file inside project directory, and set the following variables:
 
-```
+```txt
 DEBUG=True
 MYSQL_ROOT_PASSWORD=<mysql password>
 SECRET_KEY=<your django secret key>
@@ -43,7 +42,7 @@ directory. If you nedd extra stuff to be done after database creation, you could
 define *sql* and *sh* scripts inside a directory that need to be mounted in
 `/docker-entrypoint-initdb.d/` as in the following example:
 
-```
+```yml
 # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
 volumes:
   - type: bind
@@ -64,16 +63,16 @@ The MySQL container defined in `docker-compose.yml`,
 never expose a port outside, but you may want to expose it to access data with a MySQL client.
 You can get a mysql client to this container usind a db container, for instance:
 
-```
-$ docker-compose run --rm db mysql -h db -u root -p
+```bash
+docker-compose run --rm db mysql -h db -u root -p
 ```
 
 ### Dumping data from database
 
 With the docker run command, you can do a `mysite` database dump:
 
-```
-$ docker-compose run --rm db /bin/sh -c 'mysqldump -h db -u root --password=$MYSQL_ROOT_PASSWORD mysite' > dump.sql
+```bash
+docker-compose run --rm db /bin/sh -c 'mysqldump -h db -u root --password=$MYSQL_ROOT_PASSWORD mysite' > dump.sql
 ```
 
 ### Loading data in database
@@ -81,8 +80,8 @@ $ docker-compose run --rm db /bin/sh -c 'mysqldump -h db -u root --password=$MYS
 With the docker run command, you can import a `.sql` file by adding its path as
 a docker volume, for instance, if you are in `mysite_dump.sql` directory:
 
-```
-$ cat dump.sql | docker-compose run --rm db /bin/sh -c 'mysql -h db -u root --password=$MYSQL_ROOT_PASSWORD mysite'
+```bash
+cat dump.sql | docker-compose run --rm db /bin/sh -c 'mysql -h db -u root --password=$MYSQL_ROOT_PASSWORD mysite'
 ```
 
 ### Access database using adminer
@@ -90,8 +89,8 @@ $ cat dump.sql | docker-compose run --rm db /bin/sh -c 'mysql -h db -u root --pa
 You can access to mysql container using adminer, you need to connect to
 docker composed instance using the same network, for example:
 
-```
-$ docker run -d --link django_db_1:db -p 8080:8080 --name adminer --network django_default adminer
+```bash
+docker run -d --link django_db_1:db -p 8080:8080 --name adminer --network django_default adminer
 ```
 
 More information could be found in [adminer - docker hub][adminer-docker-documentation]
@@ -110,7 +109,7 @@ Django script will be served using the uwsgi server. You can get more informaton
 
 Take a look in to the uwsgi directory:
 
-```
+```bash
 $ tree uwsgi
 uwsgi
 ├── Dockerfile
@@ -134,8 +133,8 @@ docker image if it not exists (since we have not specified a destination directo
 a `mysite` project directory is created and placed under `/var/uwsgi/`.
 Inside mysite, we will have `manage.py`):
 
-```
-$ docker-compose run --rm uwsgi django-admin.py startproject mysite
+```bash
+docker-compose run --rm uwsgi django-admin.py startproject mysite
 ```
 
 This will build the django image and runs the `django-admin.py` script. If there
@@ -144,8 +143,8 @@ the `uwsgi` django container. After that, the container stops and we return to t
 shell environment. You may want to fix file permissins in order to edit files, for
 example:
 
-```
-$ sudo chown -R ${USER}:${USER} django-data
+```bash
+sudo chown -R ${USER}:${USER} django-data
 ```
 
 Next, you may need to set a list of strings representing the host/domain
@@ -236,13 +235,13 @@ have the same behaviour. You may want to create a `/static` and `/media`
 directory inside `mysite`, in order to place media files. Then you have to call
 the `collectstatic` command in order to place the static files in their directories:
 
-```
-$ mkdir django-data/mysite/static/
-$ mkdir django-data/mysite/media/
-$ docker-compose run --rm uwsgi python mysite/manage.py collectstatic
+```bash
+mkdir django-data/mysite/static/
+mkdir django-data/mysite/media/
+docker-compose run --rm uwsgi python mysite/manage.py collectstatic
 ```
 
-#### Auto restart uwsgi when code is modified:
+#### Auto restart uwsgi when code is modified
 
 As stated [here](http://uwsgi-docs.readthedocs.io/en/latest/ThingsToKnow.html?highlight=autoreload)
 autoreload could be CPU intensive and must be used only in developmente environment:
@@ -270,8 +269,8 @@ You may want to run the following commands to create the necessary django tables
 if django database is empty. The path of `manage.py` is not specified, since we
 changed the `working_dir` in `docker-compose.yml`:
 
-```
-$ docker-compose run --rm uwsgi python manage.py migrate
+```bash
+docker-compose run --rm uwsgi python manage.py migrate
 ```
 
 More info could be found [here](https://docs.djangoproject.com/en/1.11/intro/tutorial02/#database-setup)
@@ -280,8 +279,8 @@ More info could be found [here](https://docs.djangoproject.com/en/1.11/intro/tut
 
 You  need to create a user who can login to the admin site. Run the following command:
 
-```
-$ docker-compose run --rm uwsgi python manage.py createsuperuser
+```bash
+docker-compose run --rm uwsgi python manage.py createsuperuser
 ```
 
 A user and password for the admin user will be prompted. Ensure to track such
@@ -290,16 +289,16 @@ credentials
 ### Add an existing project to django container
 
 The `django-data` directory need to be create if does't exists. Then you have to
-create a <project name> directory in which put the `manage.py`. Static files needs
-to be placed inside the <project name> directory, or links or static urls needs
+create a `<project name>` directory in which put the `manage.py`. Static files needs
+to be placed inside the `<project name>` directory, or links or static urls needs
 to be modified in order to be served correctly. For instance, to place a django
 project into a `mysite` directory:
 
 ```sh
-$ mkdir -p django-data/mysite
-$ cp -r /a/django/project/ django-data/mysite/
-$ mkdir django-data/mysite/media
-$ mkdir django-data/mysite/static
+mkdir -p django-data/mysite
+cp -r /a/django/project/ django-data/mysite/
+mkdir django-data/mysite/media
+mkdir django-data/mysite/static
 ```
 
 ## Create NGINX container
@@ -329,13 +328,14 @@ django `uwsgi` container. This container expose the standard 80 port outside, bu
 
 Now start database and django (in daemonized mode):
 
+```bash
+docker-compose up -d
 ```
-$ docker-compose up -d
-```
+
 You can inspect docker logs with
 
-```
-$ docker-compose logs
+```bash
+docker-compose logs
 ```
 
 Container could be stopped and restarted via `docker-compose` compose. Even if
@@ -343,14 +343,14 @@ container are dropped, all files in *data volumes* directories remains and don't
 need to be reconfigured as the first instance. You can also run management commands
 with Docker. To migrate django database, for example, you can run:
 
-```
-$ docker-compose run --rm uwsgi python mysite/manage.py migrate
+```bash
+docker-compose run --rm uwsgi python mysite/manage.py migrate
 ```
 
 Or
 
-```
-$ docker-compose run --rm uwsgi python manage.py migrate
+```bash
+docker-compose run --rm uwsgi python manage.py migrate
 ```
 
 If you have set the `working_dir` in `docker-compose.yml` properly.
@@ -361,7 +361,7 @@ You can serve docker compose using HOST NGINX, for instance, via proxy_pass.
 Place the followin code inside NGINX server environment. Remember to specify the
 port exported by your docker NGINX instance:
 
-```
+```conf
 location /mysite/ {
   # set variable in location
   set $my_port 10080;
