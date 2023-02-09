@@ -31,6 +31,7 @@ services:
       MYSITE_DATABASE: ${MYSQL_DATABASE}
       MYSITE_USER: ${MYSQL_USER}
       MYSITE_PASSWORD: ${MYSQL_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY}
       DEBUG: ${DEBUG}
 
     # exec a different command from image

@@ -269,19 +269,19 @@ example for mysite project:
 
 ```python
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
+# https://docs.djangoproject.com/en/4.1/howto/static-files/
 STATIC_URL = '/mysite/static/'
 MEDIA_URL  = '/mysite/media/'
 
 # collect all Django static files in the static folder
-STATIC_ROOT = os.path.join(BASE_DIR, "static/")
-MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+STATIC_ROOT = BASE_DIR / "static"
+MEDIA_ROOT = BASE_DIR / "media"
 ```
 
 The `STATIC_URL` variable will tell to django (uwsgi) how to define links to static
 files, and the `STATIC_ROOT` variable will set the position in which static files
 (as the admin .css files) will be placed. The `MEDIA_ROOT` and `MEDIA_URL` variables
-have the same behaviour. You may want to create a `/static` and `/media`
+have the same behavior. You may want to create a `/static` and `/media`
 directory inside `mysite`, in order to place media files. Then you have to call
 the `collectstatic` command in order to place the static files in their directories:
 
