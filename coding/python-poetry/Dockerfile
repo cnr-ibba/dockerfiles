@@ -1,0 +1,51 @@
+#
+# VERSION 0.1
+# DOCKER-VERSION  23.0.0
+# AUTHOR:         Paolo Cozzi <paolo.cozzi@ibba.cnr.it>
+# DESCRIPTION:    A multi-stage image with python and poetry
+# TO_BUILD:       docker build --rm -t bunop/python-poetry .
+# TO_RUN:         docker run --rm -ti bunop/python-poetry bash
+# TO_TAG:         docker tag bunop/python-poetry:latest bunop/python-poetry:0.1
+#
+
+# inspired from https://bmaingret.github.io/blog/2021-11-15-Docker-and-Poetry
+# Those variables are defined before the FROM scope: to use them after, recall
+# ARG in build stages
+ARG APP_NAME=poetry-demo
+ARG APP_PATH=/opt/$APP_NAME
+ARG PYTHON_VERSION=3.11
+ARG POETRY_VERSION=1.3.2
+
+FROM python:${PYTHON_VERSION} as python-base
+
+# MAINTAINER is deprecated. Use LABEL instead
+LABEL maintainer="paolo.cozzi@ibba.cnr.it"
+
+# Import ARGs which I need in this build stage
+ARG POETRY_VERSION
+ARG APP_NAME
+ARG APP_PATH
+
+# Set some useful variables
+ENV \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONFAULTHANDLER=1
+ENV \
+    POETRY_VERSION=${POETRY_VERSION} \
+    POETRY_HOME="/opt/poetry" \
+    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_NO_INTERACTION=1
+
+# Install Poetry - respects $POETRY_VERSION & $POETRY_HOME
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python
+ENV PATH="$POETRY_HOME/bin:$PATH"
+
+# CREATE APP_PATH
+RUN mkdir -p ${APP_PATH}
+WORKDIR ${APP_PATH}
+COPY ${APP_NAME}/poetry.lock ${APP_NAME}/pyproject.toml ${APP_NAME}/README.md ./
+COPY ${APP_NAME}/poetry_demo/ ./poetry_demo/
+
+# Install stuff
+RUN poetry install
