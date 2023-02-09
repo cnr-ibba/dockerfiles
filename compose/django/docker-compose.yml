@@ -1,5 +1,5 @@
 
-version: "3.2"
+version: "3.8"
 services:
   # Create a composed Django-Postgres-NGINX instance
   db:
@@ -20,25 +20,11 @@ services:
         target: /var/lib/mysql
 
 
-  # # a variant of db image using postgresql Database
-  # db:
-  #   # get the latest postgres server
-  #   image: postgres:9.6
-  #
-  #   # Set db environment
-  #   environment:
-  #     POSTGRES_PASSWORD: my-secret-pw
-  #
-  #   # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
-  #   volumes:
-  #     - type: bind
-  #       source: ./postgres-data/
-  #       target: /var/lib/postgresql/data
-
-
   uwsgi:
     # a custom image for django
-    build: ./uwsgi
+    build:
+      context: .
+      dockerfile: uwsgi/Dockerfile
 
     # Set db environment
     environment:
