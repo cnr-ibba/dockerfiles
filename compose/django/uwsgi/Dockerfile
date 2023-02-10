@@ -60,7 +60,7 @@ RUN poetry install
 ###############################################################################
 # 2nd build stage
 
-from python:${PYTHON_VERSION}-slim
+FROM python:${PYTHON_VERSION}-slim
 
 # MAINTAINER is deprecated. Use LABEL instead
 LABEL maintainer="paolo.cozzi@ibba.cnr.it"
@@ -69,7 +69,8 @@ LABEL maintainer="paolo.cozzi@ibba.cnr.it"
 # IMPORTANT!: without this redefinition, you can't use variables defined
 # before the first FROM statement
 ARG APP_PATH
-ARG VIRTUAL_ENV=${APP_PATH}/.venv
+ARG APP_NAME
+ARG VIRTUAL_ENV=${APP_PATH}
 
 # synchronize timezone for container
 # https://forums.docker.com/t/synchronize-timezone-from-host-to-container/39116
@@ -98,10 +99,10 @@ COPY uwsgi/wait-for-mysql.sh /usr/local/bin
 RUN chmod 755 /usr/local/bin/wait-for-mysql.sh
 
 # copy the application from build stage
-COPY --from=0 ${APP_PATH} ${APP_PATH}
-WORKDIR ${APP_PATH}
+COPY --from=0 ${APP_PATH}/.venv ${APP_PATH}
+WORKDIR /var/uwsgi/${APP_NAME}
 
-# Set uwsgi directory as VOLUME
+# Set ${APP_PATH} directory as VOLUME
 VOLUME ${APP_PATH}
 
 # Expose the default port
