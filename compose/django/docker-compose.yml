@@ -23,6 +23,7 @@ services:
   uwsgi:
     # a custom image for django
     build:
+      # required to include poetry stuff into uwsgi image
       context: .
       dockerfile: uwsgi/Dockerfile
 
@@ -35,7 +36,7 @@ services:
       DEBUG: ${DEBUG}
 
     # exec a different command from image
-    command: uwsgi --ini /var/uwsgi/mysite_uwsgi.ini
+    command: uwsgi --ini /var/uwsgi/mysite_uwsgi.ini --memory-report
 
     # set working dir for uwsgi
     working_dir: /var/uwsgi/

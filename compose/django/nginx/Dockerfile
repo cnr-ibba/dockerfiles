@@ -15,6 +15,11 @@ FROM nginx:1.23
 # MAINTAINER is deprecated. Use LABEL instead
 LABEL maintainer="paolo.cozzi@ibba.cnr.it"
 
+# synchronize timezone for container
+# https://forums.docker.com/t/synchronize-timezone-from-host-to-container/39116
+RUN echo "Europe/Rome" > /etc/timezone
+RUN dpkg-reconfigure -f noninteractive tzdata
+
 # Copy nginx configuration file in conf.d directory
 COPY nginx.conf /etc/nginx/nginx.conf
 

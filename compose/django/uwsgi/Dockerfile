@@ -62,11 +62,19 @@ RUN poetry install
 
 from python:${PYTHON_VERSION}-slim
 
+# MAINTAINER is deprecated. Use LABEL instead
+LABEL maintainer="paolo.cozzi@ibba.cnr.it"
+
 # Import ARGs which I need in this build stage
 # IMPORTANT!: without this redefinition, you can't use variables defined
 # before the first FROM statement
 ARG APP_PATH
 ARG VIRTUAL_ENV=${APP_PATH}/.venv
+
+# synchronize timezone for container
+# https://forums.docker.com/t/synchronize-timezone-from-host-to-container/39116
+RUN echo "Europe/Rome" > /etc/timezone
+RUN dpkg-reconfigure -f noninteractive tzdata
 
 # install required packages
 RUN apt-get update && apt-get install -y \
@@ -82,6 +90,11 @@ ENV \
 ENV \
     VIRTUAL_ENV=${VIRTUAL_ENV} \
     PATH="${VIRTUAL_ENV}/bin:${PATH}"
+
+# utility script to ensure that mysql server is up
+# mind to the context path
+COPY uwsgi/wait-for-mysql.sh /usr/local/bin
+RUN chmod 755 /usr/local/bin/wait-for-mysql.sh
 
 # copy the application from build stage
 COPY --from=0 ${APP_PATH} ${APP_PATH}
