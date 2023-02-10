@@ -208,7 +208,7 @@ shell environment. You may want to fix file permissions in order to edit files, 
 example:
 
 ```bash
-sudo chown -R ${USER}:${USER} django-data
+sudo chown -R ${USER}:www-data django-data
 ```
 
 Next, you may need to set a list of strings representing the host/domain

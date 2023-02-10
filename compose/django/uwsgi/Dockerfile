@@ -79,6 +79,7 @@ RUN dpkg-reconfigure -f noninteractive tzdata
 # install required packages
 RUN apt-get update && apt-get install -y \
     libmariadb3 \
+    mariadb-client \
     libxml2 \
     && rm -rf /var/lib/apt/lists/*
 
