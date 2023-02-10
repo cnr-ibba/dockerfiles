@@ -4,7 +4,7 @@ services:
   # Create a composed Django-Postgres-NGINX instance
   db:
     # get the latest mysql server
-    image: mariadb:10.1
+    image: mariadb:10.10
 
     # Set db environment
     environment:

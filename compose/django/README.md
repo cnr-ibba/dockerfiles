@@ -180,6 +180,8 @@ docker-compose build uwsgi
 Please see [Managing dependencies](https://python-poetry.org/docs/managing-dependencies/)
 in poetry documentation to have more information.
 
+> TODO: manage dependencies using docker containers
+
 ### Creating a project for the first time
 
 For such example, we suppose that the django project name will be `mysite` as stated
@@ -311,7 +313,7 @@ on your application directory, for example:
   working_dir: /var/uwsgi/mysite
 ```
 
-This allows to call `manage.py` from the `mysite` project directory
+This allows to call `manage.py` without specifying the `mysite` project directory.
 
 #### Initialize django database for the first time
 
@@ -323,7 +325,7 @@ changed the `working_dir` in `docker-compose.yml`:
 docker-compose run --rm uwsgi python manage.py migrate
 ```
 
-More info could be found [here](https://docs.djangoproject.com/en/1.11/intro/tutorial02/#database-setup)
+More info could be found [here](https://docs.djangoproject.com/en/4.1/intro/tutorial02/#database-setup)
 
 #### Creating an admin user
 
@@ -335,21 +337,6 @@ docker-compose run --rm uwsgi python manage.py createsuperuser
 
 A user and password for the admin user will be prompted. Ensure to track such
 credentials
-
-### Add an existing project to django container
-
-The `django-data` directory need to be create if does't exists. Then you have to
-create a `<project name>` directory in which put the `manage.py`. Static files needs
-to be placed inside the `<project name>` directory, or links or static urls needs
-to be modified in order to be served correctly. For instance, to place a django
-project into a `mysite` directory:
-
-```sh
-mkdir -p django-data/mysite
-cp -r /a/django/project/ django-data/mysite/
-mkdir django-data/mysite/media
-mkdir django-data/mysite/static
-```
 
 ## Create NGINX container
 

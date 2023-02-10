@@ -71,6 +71,7 @@ ARG VIRTUAL_ENV=${APP_PATH}/.venv
 # install required packages
 RUN apt-get update && apt-get install -y \
     libmariadb3 \
+    libxml2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set some useful variables
