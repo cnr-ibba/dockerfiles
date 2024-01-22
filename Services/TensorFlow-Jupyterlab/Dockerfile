@@ -1,15 +1,15 @@
 #
-# VERSION 0.1
-# DOCKER-VERSION  20.10.23
+# VERSION 0.2
+# DOCKER-VERSION  25.0.0
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ibba.cnr.it>
 # DESCRIPTION:    Jupyterlab with tensorflow and GPU support
 # TO_BUILD:       docker build --rm -t bunop/tensorflow-jupyterlab:latest .
 # TO_RUN:         docker run --gpus all -it --rm -u $(id -u):$(id -g) -v $(realpath $PWD):/tf/notebooks -p 8888:8888 bunop/tensorflow-jupyterlab:latest
-# TO_TAG:         docker tag bunop/tensorflow-jupyterlab:latest bunop/tensorflow-jupyterlab:0.1
+# TO_TAG:         docker tag bunop/tensorflow-jupyterlab:latest bunop/tensorflow-jupyterlab:0.2
 #
 
 # base image
-FROM tensorflow/tensorflow:2.11.0-gpu-jupyter
+FROM tensorflow/tensorflow:2.15.0.post1-jupyter
 
 # MAINTAINER is deprecated. Use LABEL instead
 LABEL maintainer="paolo.cozzi@ibba.cnr.it"
