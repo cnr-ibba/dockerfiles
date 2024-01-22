@@ -48,23 +48,27 @@ services:
 
 
   nginx:
-    # get the latest nginx image
+    # a custom image for NGINX
     build: ./nginx
+
     volumes:
-      - "/etc/localtime:/etc/localtime:ro"
-      - "./nginx/conf.d/:/etc/nginx/conf.d/"
+      - type: bind
+        source: ./nginx/conf.d/
+        target: /etc/nginx/conf.d/
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime:ro
+
     volumes_from:
       - php
+
     ports:
       - "10080:10080"
+
+    # link container uwsgi
     links:
       - php
-
-    # for logging (only on docker 1.8 and higher):
-    # log_driver: "json-file"
-    # log_opt:
-    #   max-size: 1M
-    #   max-file: "10"
 
     # auto restart container
     restart: always
