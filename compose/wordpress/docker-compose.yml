@@ -3,26 +3,20 @@ version: "3.8"
 services:
   db:
     # get the latest mysql server
-    build: ./db
+    image: mariadb:10.11
 
     # Set db environment
     environment:
-      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
     # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
     volumes:
-      - "./mysql-data:/var/lib/mysql"
-      - "/etc/localtime:/etc/localtime:ro"
-      - "./db/conf.d:/etc/mysql/conf.d"
-
-    # for logging (only on docker 1.8 and higher):
-    # log_driver: "json-file"
-    # log_opt:
-    #   max-size: 1M
-    #   max-file: "10"
-
-    # auto restart container
-    restart: always
+      - type: bind
+        source: ./mysql-data/
+        target: /var/lib/mysql
 
 
   php:
