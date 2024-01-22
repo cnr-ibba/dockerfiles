@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "poetry-demo"
+version = "0.1.0"
+description = ""
+authors = ["Paolo Cozzi <paolo.cozzi@ibba.cnr.it>"]
+readme = "README.md"
+packages = [{include = "poetry_demo"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

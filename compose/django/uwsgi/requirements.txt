@@ -1,5 +1,0 @@
-uwsgi
-mysqlclient
-psycopg2
-django>=2.2.4
-python-decouple

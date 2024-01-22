@@ -12,7 +12,7 @@ names and ports according your needs. Build and provide a service using the
 Projects hosted in this repository:
 
 * composetest: `docker-compose` tutorial
-* django: composed image of `django`, `nginx` and `mysql` (or `postgres`)
+* django: composed image of `django`, `nginx` and `mysql`
 * gbrowse: composed image of `mysql` and `gbrowse2`
 * gitlab: `gitlab` Community Edition image
 * mysql: composed image of `mysql`, `nginx` and `php-fpm` serving `phpmyadmin`
