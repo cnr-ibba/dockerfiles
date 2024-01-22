@@ -1,7 +1,7 @@
 
 version: "3.8"
 services:
-  db:
+  mysql:
     # get the latest mysql server
     image: mariadb:10.11
 
@@ -18,30 +18,45 @@ services:
         source: ./mysql-data/
         target: /var/lib/mysql
 
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+    # auto restart container
+    restart: always
+
 
   php:
     build: ./php
+
     expose:
       - "9000"
+
     #links container togheter
     links:
-      - db:mysql
+      - mysql
 
     # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
     volumes:
-      - "./php-data:/var/www/html"
-      - "/etc/localtime:/etc/localtime:ro"
-      # exporting this directory, will enable purgin cache from wp-admin
-      - "/var/run/"
+      - type: bind
+        source: ./php-data/
+        target: /var/www/html/
 
-    # for logging (only on docker 1.8 and higher):
-    # log_driver: "json-file"
-    # log_opt:
-    #   max-size: 1M
-    #   max-file: "10"
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      # exporting this directory, will enable purgin cache from wp-admin
+      - type: volume
+        source: run-data
+        target: /var/run/
+        volume:
+          nocopy: true
 
     environment:
-      PROJECT_NAME: blog
+      PROJECT_NAME: ${PROJECT_NAME}
 
     # auto restart container
     restart: always
@@ -58,7 +73,8 @@ services:
 
       - type: bind
         source: /etc/localtime
-        target: /etc/localtime:ro
+        target: /etc/localtime
+        read_only: true
 
     volumes_from:
       - php
@@ -75,3 +91,6 @@ services:
 
 networks:
   default:
+
+volumes:
+  run-data:

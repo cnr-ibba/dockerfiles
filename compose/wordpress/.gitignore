@@ -1,3 +1,6 @@
 # ignoring docker volumes
 mysql-data/
 php-data
+
+# ignoring config files
+.env
