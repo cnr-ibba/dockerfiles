@@ -4,3 +4,7 @@ php-data
 
 # ignoring config files
 .env
+
+# ingnoring dump files
+*.sql
+*.gz
