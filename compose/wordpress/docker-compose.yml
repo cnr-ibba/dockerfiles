@@ -1,74 +1,89 @@
 
-db:
-  # get the latest mysql server
-  build: ./db
+version: "3.8"
+services:
+  mysql:
+    # get the latest mysql server
+    image: mariadb:10.11
 
-  # Set db environment
-  environment:
-    MYSQL_ROOT_PASSWORD: my-secret-pw
+    env_file: .env
 
-  # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
-  volumes:
-    - "./mysql-data:/var/lib/mysql"
-    - "/etc/localtime:/etc/localtime:ro"
-    - "./db/conf.d:/etc/mysql/conf.d"
+    # Set db environment
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
-  # for logging (only on docker 1.8 and higher):
-  # log_driver: "json-file"
-  # log_opt:
-  #   max-size: 1M
-  #   max-file: "10"
+    # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
+    volumes:
+      - type: bind
+        source: ./mysql-data/
+        target: /var/lib/mysql
 
-  # auto restart container
-  restart: always
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
 
-
-php:
-  build: ./php
-  expose:
-    - "9000"
-  #links container togheter
-  links:
-    - db:mysql
-
-  # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
-  volumes:
-    - "./php-data:/var/www/html"
-    - "/etc/localtime:/etc/localtime:ro"
-    # exporting this directory, will enable purgin cache from wp-admin
-    - "/var/run/"
-
-  # for logging (only on docker 1.8 and higher):
-  # log_driver: "json-file"
-  # log_opt:
-  #   max-size: 1M
-  #   max-file: "10"
-
-  environment:
-    PROJECT_NAME: blog
-
-  # auto restart container
-  restart: always
+    # auto restart container
+    restart: always
 
 
-nginx:
-  # get the latest nginx image
-  build: ./nginx
-  volumes:
-    - "/etc/localtime:/etc/localtime:ro"
-    - "./nginx/conf.d/:/etc/nginx/conf.d/"
-  volumes_from:
-    - php
-  ports:
-    - "10080:10080"
-  links:
-    - php
+  php:
+    image: wordpress:6.4.2-fpm
 
-  # for logging (only on docker 1.8 and higher):
-  # log_driver: "json-file"
-  # log_opt:
-  #   max-size: 1M
-  #   max-file: "10"
+    expose:
+      - "9000"
 
-  # auto restart container
-  restart: always
+    #links container togheter
+    links:
+      - mysql
+
+    # to export volume, as recommeded in https://registry.hub.docker.com/u/library/mysql/
+    volumes:
+      - type: bind
+        source: ./php-data/
+        target: /var/www/html/
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+    env_file: .env
+
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+
+    # auto restart container
+    restart: always
+
+
+  nginx:
+    # a custom image for NGINX
+    build: ./nginx
+
+    volumes:
+      - type: bind
+        source: ./nginx/conf.d/
+        target: /etc/nginx/conf.d/
+
+      - type: bind
+        source: ./php-data/
+        target: /var/www/html/
+
+    ports:
+      - "10080:80"
+
+    # link container uwsgi
+    links:
+      - php
+
+    # auto restart container
+    restart: always
+
+networks:
+  default:
