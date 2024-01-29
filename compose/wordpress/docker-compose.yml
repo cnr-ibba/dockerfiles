@@ -30,7 +30,7 @@ services:
 
 
   php:
-    image: wordpress:6.4.2-fpm
+    build: php
 
     expose:
       - "9000"
